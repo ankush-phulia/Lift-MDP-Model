@@ -5,14 +5,33 @@ using namespace std;
 // Store the state space
 	std::bitset<126> mystate;
 
-bool floorbuttonpressed(int n) {
+int get_location(int n) {
+	int location;
+	location = mystate[35+n*8] + 2*mystate[36+n*8] + 4*mystate[37+n*8];
+	return location;
+}
+
+int get_waiting_time(int n) {
+	int time;
+	time = mystate[31+n*8] + 2*mystate[32+n*8] + 4*mystate[33+n*8] + 8*mystate[34+n*8];
+	return time;
+}
+
+bool does_person_exist(int n) {
+	if(mystate[30+n*8]) 
+		return true;
+	else
+		return false;
+}
+
+bool floor_button_pressed(int n) {
 	if(mystate[n+21])
 		return true;
 	else
 		return false;
 }
 
-bool elevatorbuttonpressed(int n, int k) {
+bool elevator_button_pressed(int n, int k) {
 	if(k == 1) {
 		if(mystate[11+n])
 			return true;
