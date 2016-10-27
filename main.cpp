@@ -5,6 +5,80 @@ using namespace std;
 // Store the state space
 	std::bitset<126> mystate;
 
+// FUNCTIONS TO UPDATE THE STATE OF VARIABLES
+void update_floor(int n, int k) {
+	for(int i = 2; i >= 0; i--) {
+		mystate[-3+k*3+i] = n%2;
+		n = n/2;
+	}
+}
+
+void elevator_moves(int dir, int k) {
+	bool down = false, up = false;
+	int index = 4 + 2*k;
+	if(dir == 1)
+		up = true;
+	else if(dir == -1)
+		down = true;
+	mystate[index] = down;
+	mystate[index+1] = up;
+}
+
+void elevator_doors_open(bool open, int k) {
+	if(open)
+		mystate[9+k] = true;
+	else
+		mystate[9+k] = false;
+}
+
+void lift_button(int n, int k, bool pressed) {
+	if(pressed) 
+		mystate[6+5*k+n] = true;
+	else
+		mystate[6+5*k+n] = false;
+}
+
+void floor_button(int n, bool pressed) {
+	if(pressed) 
+		mystate[21+n] = true;
+	else
+		mystate[21+n] = false;
+}
+
+void add_person(int n, int floor) {
+	mystate[30+n*8] = true;
+	for(int i = 0; i < 4; i++) {
+		mystate[31+n*8+i] = false;
+	}
+	for(int i = 2; i >= 0; i--) {
+		mystate[35+n*8+i] = floor%2;
+		floor = floor/2;
+	}
+}
+
+void delete_person(int n) {
+	for(int i = 0; i < 8; i++) {
+		mystate[30+n*8+i] = false;
+	}
+}
+
+void person_moves(int n, int loc) {
+	for(int i = 2; i >= 0; i--) {
+		mystate[35+n*8+i] = loc%2;
+		loc = loc/2;
+	}
+}
+
+void update_person_time(int n) {
+	int time = get_waiting_time(n);
+	time++;
+	for(int i = 3; i >= 0; i--) {
+		mystate[31+n*8+i] = time%2;
+		time = time/2;
+	}
+}
+
+// FUNCTIONS TO GET STATE OF VARIABLES
 int get_location(int n) {
 	int location;
 	location = mystate[35+n*8] + 2*mystate[36+n*8] + 4*mystate[37+n*8];
