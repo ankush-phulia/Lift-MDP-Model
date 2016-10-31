@@ -46,6 +46,11 @@ public:
 		//k = 0,1 ; n = 0,1,2,3,4
 		return (elevator&(1<<(14+8*k+n)))==1;
 	}
+	inline bool floorButtonPressed(int n, int upordown){
+		//make upordown bool??!!
+		//careful when using button for floor 1 or 5, always give upordown as 0 or false
+		return (elevator&(1<<(6+n+upordown)))==1;
+	}
 
 	//methods for changing elevators
 	void setFloor(int k, int n);
