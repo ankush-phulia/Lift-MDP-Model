@@ -39,182 +39,161 @@ class node {
 	}
 }initial_state, current_state;
 
-// CREATE NEW STATES
-void create_state(vector<string> actions, node current_state) {
-	node new_state(current_state);
-
-	for(int i = 0; i < actions.size(); i++) {
-		// A PERSON BEING ADDED
-		if(action[i][0] == 'P') {
-			if(action[i][1] == 'I') {
-				int person = (int)action[i][2] -'0';
-				int floor = (int)action[i][3] - '0';
-				new_state.add_person
-				add_person(person, floor, new_state.mystate);
-			}
-			else if(action[i][1] == 'O') {
-				int person = (int)action[i][2] - '0';
-				delete_person(person, new_state.mystate)
-			}
-			else if(action[i][1] == 'D') {
-				int person = (int)action[i][2] - '0';
-				int destination = (int)action[i][3] - '0';
-				update_person_destination(person, destination, new_state.mystate);
-			}
-			else if(action[i][1] == 'L') {
-				int person = (int)action[i][2] - '0';
-				int location = (int)action[i][3] - '0';
-				person_moves(person, location, new_state.mystate);
-			}
-		}
-
-		// A BUTTON BEING PRESSED
-		if(action[i][0] == 'B') {
-			if(action[i][1] == 'U') {
-				int floor = (int)action[i][2] - '0';
-				floor_button(2*floor-1, true, new_state.mystate);
-			}
-			else if(action[i][1] == 'D') {
-				int floor = (int)action[i][2] - '0';
-				floor_button(2*(floor-1), true, new_state.mystate);
-			}
-			else if(action[i][1] == 'O') {
-				int button = (int)action[i][2] - '0';
-				floor_button(button, false, new_state.mystate);
-			}
-			else if(action[i][1] == 'F') {
-				int floor = (int)action[i][2] - '0';
-				int elevator = (int)action[i][3] - '0';
-				lift_button(floor, elevator, false, new_state.mystate);
-			}
-			else {
-				int floor = (int)action[i][1] - '0';
-				int elevator = (int)action[i][2] - '0';
-				lift_button(floor, elevator, true, new_state.mystate);
-			}
-		}
-
-		// LIFT MOVING
-		if(action[i][0] == 'A') {
-			if(action[i][1] == 'U') {
-				int elevator = (int)action[i][2] -'0';
-				elevator_moves(1, elevator, new_state.mystate);
-			}
-			else if(action[i][1] == 'D') {
-				int elevator = (int)action[i][2] -'0';
-				elevator_moves(-1, elevator, new_state.mystate);
-			}
-			else if(action[i][1] == 'S') {
-				int elevator = (int)action[i][2] -'0';
-				elevator_moves(0, elevator, new_state.mystate);
-			}
-			else if(action[i][1] == 'O') {
-				int elevator = (int)action[i][3] -'0';
-				if(action[i][2] == 'U') {
-					elevator_moves(1, elevator, new_state.mystate);
-				}
-				else if(action[i][2] == 'D') {
-					elevator_moves(-1, elevator, new_state.mystate);
-				}
-				elevator_doors(true, elevator, new_state.mystate);
-			}
-			else if(action[i][1] == 'C') {
-				int elevator = (int)action[i][3] -'0';
-				if(action[i][2] == 'U') {
-					elevator_moves(1, elevator, new_state.mystate);
-				}
-				else if(action[i][2] == 'D') {
-					elevator_moves(-1, elevator, new_state.mystate);
-				}
-				elevator_doors(false, elevator, new_state.mystate);
-			}
-			else {
-				int elevator = (int)action[i][1] -'0';
-				int floor = (int)action[i][2] -'0';
-				update_floor(floor, elevator, new_state.mystate);
-			}
-		}
-	}
-	for(int i = 0; i < no_of_people; i++) {
-		if(new_state.mystate[10+4*P+n*11])
-			update_person_time(i, new_state.mystate);
-	}
-	current_state.links.push_back(new_state);
-	count++;
-}
-
 // APPLY BUTTON PUSHES
 node perform_input_action(vector<string> actions, node current_node) {
 	node midway_node(current_node);
 	vector<int> floor_buttons;
-	int buttons_pressed = actions.size()-1;
-	if(midway_node.mystate.isOpen(0)) {
-		int floor = midway_node.mystate.getFloor(0);
-		int direction = midway_node.mystate.getDirection(0)%2;
+	vector<string> elevator1_button_actions;
+	vector<string> elevator2_button_actions;
+	int buttons_pressed1 = 0;
+	int buttons_pressed2 = 0;
+	int floor1_elev1_flag = 0;
+	int floor1_elev2_flag = 0;
+	for(int i = 1; i < actions.size(); i++) {
+		if(actions[i][4] == '1') {
+			if(actions[i][2] == '1')
+				floor1_elev1_flag = 1;
+			elevator1_button_actions.push_back(actions[i]);
+			buttons_pressed1++;
+		}
+		else {
+			if(actions[i][2] == '1')
+				floor1_elev2_flag = 1;
+			elevator2_button_actions.push_back(actions[i]);
+			buttons_pressed2++;
+		}
+	}
+
+	if(midway_node.mystate.isOpen(1)) {
+		int floor = midway_node.mystate.getFloor(1);
+		int direction = midway_node.mystate.getDirection(1)%2;
 		midway_node.mystate.turnOffFloorButton(floor, direction);
 		float floor_prob;
 		vector<int> elevator_buttons;
 		if(direction) {
 			floor_prob = midway_node.mystate.getProbFloUp(floor);
 			midway_node.mystate.setProbFloUp(floor, 0.0);
-			for(int i = floor; i < N; i++) {
-				if(midway_node.mystate.elevatorButtonPressed(0, i))
+			for(int i = floor+1; i <= N; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(1, i))
 					elevator_buttons.push_back(i);
 			}
 		}
 		else {
 			floor_prob = midway_node.mystate.getProbFloDown(floor);
 			midway_node.mystate.setProbFloDown(floor, 0.0);
-			for(int i = 0; i < floor; i++) {
-				if(midway_node.mystate.elevatorButtonPressed(0, i))
+			for(int i = 1; i < floor; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(1, i))
 					elevator_buttons.push_back(i);
+				if(i == 1) 
+					floor1_elev1_flag = 2;
 			}
 		}
 		int size = elevator_buttons.size();
-		if(buttons_pressed == 0) {
+		if(buttons_pressed1 == 0) {
 			for(int i = 0; i < size; i++) {
 				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 0);
 				float prob = elev_prob + floor_prob / size;
-				midway_node.mystate.setProbElev(0, elevator_buttons[i], prob);
+				midway_node.mystate.setProbElev(1, elevator_buttons[i], prob);
 			}
 		}
-		// else {
-		// 	if(floor_prob > buttons_pressed) {
-		// 		floor_prob = floor_prob - buttons_pressed;
-		// 		for(int i = 0; i < buttons_pressed; i++) {
-		// 		}
-		// 	}
-		// }
-	}
-	if(midway_node.mystate.isOpen(1)) {
-		int floor = midway_node.mystate.getFloor(1);
-		int direction = midway_node.mystate.getDirection(1)%2;
-		midway_node.mystate.turnOffFloorButton(floor, direction);
-		if(buttons_pressed == 0) {
-			float floor_prob;
-			vector<int> elevator_buttons;
-			if(direction) {
-				floor_prob = midway_node.mystate.getProbFloUp(floor);
-				for(int i = floor; i < N; i++) {
-					if(midway_node.mystate.elevatorButtonPressed(0, i))
-						elevator_buttons.push_back(i);
+		else {
+			if(floor_prob > buttons_pressed) {
+				int total_buttons_pressed = buttons_pressed1 + elevator_buttons.size();
+				floor_prob = floor_prob - buttons_pressed1;
+				for(int i = 0; i < buttons_pressed1; i++) {
+					int floor_no = elevator1_button_actions[i][3];
+					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 1);
+					if(floor_no == 1)
+						elev_floor_prob += (1.0 + floor_prob*r);
+					if(floor1_elev1_flag)
+						elev_floor_prob += (1.0 + floor_prob*(1-r)/(total_buttons_pressed-1));
+					midway_node.mystate.setProbElev(1, floor_no, elev_floor_prob);
+				}
+				for(int i = 0; i < elevator_buttons.size(); i++) {
+					float elev_floor_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 1);
+					if(floor_no == 1)
+						elev_floor_prob += (floor_prob*r);
+					if(floor1_elev1_flag)
+						elev_floor_prob += (floor_prob*(1-r)/(total_buttons_pressed-1));
+					midway_node.mystate.setProbElev(1, floor_no, elev_floor_prob);
 				}
 			}
 			else {
-				floor_prob = midway_node.mystate.getProbFloDown(floor);
-				for(int i = 0; i < floor; i++) {
-					if(midway_node.mystate.elevatorButtonPressed(0, i))
-						elevator_buttons.push_back(i);
+				for(int i = 0; i < buttons_pressed1; i++) {
+					int floor_no = elevator1_button_actions[i][3];
+					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 1);
+					elev_floor_prob += (1.0);
+					midway_node.mystate.setProbElev(1, floor_no, elev_floor_prob);
 				}
-			}
-			int size = elevator_buttons.size();
-			for(int i = 0; i < size; i++) {
-				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 0);
-				float prob = elev_prob + floor_prob / size;
-				midway_node.mystate.setProbElev(0, elevator_buttons[i], prob);
 			}
 		}
 	}
+
+	if(midway_node.mystate.isOpen(2)) {
+		int floor = midway_node.mystate.getFloor(2);
+		int direction = midway_node.mystate.getDirection(2)%2;
+		midway_node.mystate.turnOffFloorButton(floor, direction);
+		float floor_prob;
+		vector<int> elevator_buttons;
+		if(direction) {
+			floor_prob = midway_node.mystate.getProbFloUp(floor);
+			midway_node.mystate.setProbFloUp(floor, 0.0);
+			for(int i = floor+1; i <= N; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(2, i))
+					elevator_buttons.push_back(i);
+			}
+		}
+		else {
+			floor_prob = midway_node.mystate.getProbFloDown(floor);
+			midway_node.mystate.setProbFloDown(floor, 0.0);
+			for(int i = 1; i < floor; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(2, i))
+					elevator_buttons.push_back(i);
+				if(i == 1) 
+					floor1_elev2_flag = 2;
+			}
+		}
+		int size = elevator_buttons.size();
+		if(buttons_pressed2 == 0) {
+			for(int i = 0; i < size; i++) {
+				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 0);
+				float prob = elev_prob + floor_prob / size;
+				midway_node.mystate.setProbElev(2, elevator_buttons[i], prob);
+			}
+		}
+		else {
+			if(floor_prob > buttons_pressed) {
+				int total_buttons_pressed = buttons_pressed2 + elevator_buttons.size();
+				floor_prob = floor_prob - buttons_pressed2;
+				for(int i = 0; i < buttons_pressed2; i++) {
+					int floor_no = elevator2_button_actions[i][3];
+					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 2);
+					if(floor_no == 1)
+						elev_floor_prob += (1.0 + floor_prob*r);
+					if(floor1_elev2_flag)
+						elev_floor_prob += (1.0 + floor_prob*(1-r)/(total_buttons_pressed-1));
+					midway_node.mystate.setProbElev(2, floor_no, elev_floor_prob);
+				}
+				for(int i = 0; i < elevator_buttons.size(); i++) {
+					float elev_floor_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 2);
+					if(floor_no == 1)
+						elev_floor_prob += (floor_prob*r);
+					if(floor1_elev2_flag)
+						elev_floor_prob += (floor_prob*(1-r)/(total_buttons_pressed-1));
+					midway_node.mystate.setProbElev(2, floor_no, elev_floor_prob);
+				}
+			}
+			else {
+				for(int i = 0; i < buttons_pressed1; i++) {
+					int floor_no = elevator2_button_actions[i][3];
+					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 1);
+					elev_floor_prob += (1.0);
+					midway_node.mystate.setProbElev(2, floor_no, elev_floor_prob);
+				}
+			}
+		}
+	}
+
 	if(action[0][0] == '0') {
 		bool flag = false;
 		for(int j = 0; j < N; j++) {
@@ -265,8 +244,10 @@ node perform_input_action(vector<string> actions, node current_node) {
 	return midway_node;
 }
 
+void generate_actions();
+
 // PERFORM ACTION
-void perform_output_action(vector<string> actions, vector<string> new_actions, state current_state) {
+node perform_output_action(vector<string> actions, node midway_node) {
 
 	// Lets get some variables from the current state
 	int new_floor1 = get_floor(1, current_state.mystate);
@@ -421,202 +402,6 @@ void perform_output_action(vector<string> actions, vector<string> new_actions, s
 	}
 }
 
-// // FUNCTIONS TO UPDATE THE STATE OF VARIABLES
-// void update_floor(int n, int k, bitset<encoding_size> mystate) {
-// 	for(int i = 2; i >= 0; i--) {
-// 		mystate[-3+k*3+i] = n%2;
-// 		n = n/2;
-// 	}
-// }
-
-// void elevator_moves(int dir, int k, bitset<encoding_size> mystate) {
-// 	bool down = false, up = false;
-// 	int index = 4 + 2*k;
-// 	if(dir == 1)
-// 		up = true;
-// 	else if(dir == -1)
-// 		down = true;
-// 	mystate[index] = down;
-// 	mystate[index+1] = up;
-// }
-
-// void elevator_doors(bool open, int k, bitset<encoding_size> mystate) {
-// 	if(open)
-// 		mystate[9+k] = true;
-// 	else
-// 		mystate[9+k] = false;
-// }
-
-// void lift_button(int n, int k, bool pressed, bitset<encoding_size> mystate) {
-// 	if(pressed) 
-// 		mystate[6+P*k+n] = true;
-// 	else
-// 		mystate[6+P*k+n] = false;
-// }
-
-// void floor_button(int n, bool pressed, bitset<encoding_size> mystate) {
-// 	if(pressed) 
-// 		mystate[11+2*P+n] = true;
-// 	else
-// 		mystate[11+2*P+n] = false;
-// }
-
-// void add_person(int n, int floor, bitset<encoding_size> mystate) {
-// 	mystate[10+4*P+n*11] = true;
-// 	for(int i = 0; i < 4; i++) {
-// 		mystate[11+4*P+n*11+i] = false;
-// 	}
-// 	for(int i = 2; i >= 0; i--) {
-// 		mystate[15+4*P+n*11+i] = floor%2;
-// 		floor = floor/2;
-// 	}
-// }
-
-// void delete_person(int n, bitset<encoding_size> mystate) {
-// 	for(int i = 0; i < 11; i++) {
-// 		mystate[10+4*P+n*11+i] = false;
-// 	}
-// }
-
-// void person_moves(int n, int loc, bitset<encoding_size> mystate) {
-// 	for(int i = 2; i >= 0; i--) {
-// 		mystate[15+4*P+n*11+i] = loc%2;
-// 		loc = loc/2;
-// 	}
-// }
-
-// void update_person_time(int n, bitset<encoding_size> mystate) {
-// 	int time = get_waiting_time(n);
-// 	time++;
-// 	for(int i = 3; i >= 0; i--) {
-// 		mystate[11+4*P+n*11+i] = time%2;
-// 		time = time/2;
-// 	}
-// }
-
-// void update_person_destination(int n, int floor, bitset<encoding_size> mystate) {
-// 	for(int i = 2; i >= 0; i--) {
-// 		mystate[18+4*P+n*11+i] = floor%2;
-// 		floor = floor/2;
-// 	}
-// }
-
-// // FUNCTIONS TO GET STATE OF VARIABLES
-// bool any_lift_buttons_pressed(int k, bitset<encoding_size> mystate) {
-// 	for(int i = 1; i <= P; i++) {
-// 		if(mystate[6+k*P+i])
-// 			return true;
-// 	}
-// 	return false;
-// }
-
-// bool any_lift_buttons_pressed_above(int n, int k, bitset<encoding_size> mystate) {
-// 	for(int i = n+1; i <= P; i++) {
-// 		if(mystate[6+k*P+i])
-// 			return true;
-// 	}
-// 	return false;
-// }
-
-// bool any_lift_buttons_pressed_below(int n, int k, bitset<encoding_size> mystate) {
-// 	for(int i = 1; i <= n-1; i++) {
-// 		if(mystate[6+k*P+i])
-// 			return true;
-// 	}
-// 	return false;
-// }
-
-// int get_destination(int n, bitset<encoding_size> mystate) {
-// 	int destination;
-// 	destination = mystate[18+4*P+n*11] + 2*mystate[19+4*P+n*11] + 4*mystate[20+4*P+n*11];
-// 	return destination;
-// }
-
-// int get_location(int n, bitset<encoding_size> mystate) {
-// 	int location;
-// 	location = mystate[15+4*P+n*11] + 2*mystate[16+4*P+n*11] + 4*mystate[17+4*P+n*11];
-// 	return location;
-// }
-
-// int get_waiting_time(int n, bitset<encoding_size> mystate) {
-// 	int time;
-// 	time = mystate[11+4*P+n*11] + 2*mystate[12+4*P+n*11] + 4*mystate[13+4*P+n*11] + 8*mystate[14+4*P+n*11];
-// 	return time;
-// }
-
-// bool does_person_exist(int n, bitset<encoding_size> mystate) {
-// 	if(mystate[10+4*P+n*11]) 
-// 		return true;
-// 	else
-// 		return false;
-// }
-
-// bool floor_button_pressed(int n, bitset<encoding_size> mystate) {
-// 	if(mystate[n+11+2*P])
-// 		return true;
-// 	else
-// 		return false;
-// }
-
-// bool elevator_button_pressed(int n, int k, bitset<encoding_size> mystate) {
-// 	if(k == 1) {
-// 		if(mystate[11+n])
-// 			return true;
-// 		else
-// 			return false;
-// 	}
-// 	else {
-// 		if(mystate[11+P+n])
-// 			return true;
-// 		else
-// 			return false;
-// 	}
-// }
-
-// bool doors_opened(int k, bitset<encoding_size> mystate) {
-// 	if(k == 1) {
-// 		if(mystate[10]) 
-// 			return true;
-// 		else
-// 			return false;
-// 	}
-// 	else {
-// 		if(mystate[11]) 
-// 			return true;
-// 		else
-// 			return false;
-// 	}
-// }
-
-// int get_direction(int k, bitset<encoding_size> mystate) {
-// 	int direction;
-// 	if(k == 1) {
-// 		if(mystate[6])
-// 			direction = -1;
-// 		else if(mystate[7])
-// 			direction = 1;
-// 		else
-// 			direction = 0;
-// 	}
-// 	else {
-// 		if(mystate[8])
-// 			direction = -1;
-// 		else if(mystate[9])
-// 			direction = 1;
-// 		else
-// 			direction = 0;
-// 	}
-// 	return direction;
-// }
-
-// int get_floor(int k, bitset<encoding_size> mystate) {
-// 	int floor;
-// 	if(k == 1)
-// 		floor = mystate[0] + mystate[1]*2 + mystate[2]*4;
-// 	else
-// 		floor = mystate[3] + mystate[4]*2 + mystate[5]*4;
-// 	return floor;
-// }
 
 void go1(int offset, int k) {
   if (k == 0) {
@@ -644,7 +429,7 @@ void go2(int offset, int k) {
   }
 }
 
-void generate_input_actions(node curr_node, vector<vector<string>> actions) {
+void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 	int flag1 = 0, flag2 = 0, count = 0;
 	if(curr_node.mystate.isOpen(0)) {
 		flag1 = 1;
@@ -664,11 +449,11 @@ void generate_input_actions(node curr_node, vector<vector<string>> actions) {
 			else {
 				string myaction;
 				if(i%2 == 0) {
-					myaction = "BD";
+					myaction = "BD_";
 					myaction += i/2 + 1;
 				}
 				else {
-					myaction = "BU";
+					myaction = "BU_";
 					myaction += i/2 + 1;
 				}
 				input_action.push_back(myaction);
