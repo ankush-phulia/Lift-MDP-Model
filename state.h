@@ -1,5 +1,6 @@
 #ifndef STATE_H
 #define STATE_H
+#include "bits/stdc++.h"
 #include <bitset>
 #include <vector>
 
@@ -13,7 +14,7 @@ public:
 	//0-2: elevator 0 position
 	//3-5: elevator 1 position
 	//6-15 : buttons on floors //down and up
-	//16-18: elevator 0 buttons
+	//16-20: elevator 0 buttons
 	//21-25: elevator 1 buttons
 	//26-27: e1 direction
 	//28-29: e2 direction
@@ -35,19 +36,19 @@ public:
 		return (elevator>>(3*(k-1)))&7;
 	}
 	inline bool isOpen(int k){
-		return (elevator&(1<<(30+k-1)))==1;
+		return (elevator>>(30+k-1))&1==1;
 	}
 	inline int getDirection(int k){
-		return (elevator>>(25+k-1))&3;
+		return (elevator>>(26+2*k-2))&3;
 	}
 	inline bool elevatorButtonPressed(int k, int n){
 		//k = 1,2 ; n = 1,2,3,4,5
-		return (elevator&(1<<(16+8*(k-1)+n-1)))==1;
+		return (elevator>>(16+5*(k-1)+n-1))&1==1;
 	}
 	inline bool floorButtonPressed(int n, int upordown){
 		//make upordown bool??!!
 		//careful when using button for floor 1 or 5, always give upordown as 0 or false
-		return (elevator&(1<<(6+2*(n-1)+upordown)))==1;
+		return (elevator>>(6+2*(n-1)+upordown))&1==1;
 	}
 
 	//methods for changing elevators
@@ -67,8 +68,8 @@ public:
 		elevator ^= (1<<(30+k-1));
 	}
 
-	//00 for static, 01 for up, 10 for down
-	inline void setDirection(int k, int dir);
+	//10 for static, 01 for up, 00 for down
+	void setDirection(int k, int dir);
 
 	// inline void toggleFloorButton(int n, int upordown){
 	// 	//make upordown bool??!!
@@ -79,7 +80,7 @@ public:
 		elevator |= 1<<(6+2*(n-1)+upordown);
 	}
 
-	inline void turnOffFloorButton(int n, int uporodown){
+	inline void turnOffFloorButton(int n, int upordown){
 		elevator |= 1<<(6+2*(n-1)+upordown);
 		elevator ^= 1<<(6+2*(n-1)+upordown);
 	}
@@ -89,12 +90,12 @@ public:
 	// }
 
 	inline void turnOnElevatorButton(int n, int k){
-		elevator |= (1<<(16+8*(k-1)+n-1));
+		elevator |= (1<<(16+5*(k-1)+n-1));
 	}
 
 	inline void turnOffElevatorButton(int n, int k){
-		elevator |= (1<<(16+8*(k-1)+n-1));
-		elevator ^= (1<<(16+8*(k-1)+n-1));		
+		elevator |= (1<<(16+5*(k-1)+n-1));
+		elevator ^= (1<<(16+5*(k-1)+n-1));		
 	}
 
 	//methods for retrieving distribution

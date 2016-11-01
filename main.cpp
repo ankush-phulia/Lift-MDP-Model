@@ -1,4 +1,4 @@
-#include "state.h"
+#include "uct.h"
 #include <iostream>
 #include <bitset>
 
@@ -541,157 +541,157 @@ node perform_output_action(vector<uint8_t> actions, node midway_node) {
 	
 	node final_node(midway_node);
 
-	// Lets get some variables from the current state
-	int new_floor1 = get_floor(1, current_state.mystate);
-	int new_floor2 = get_floor(2, current_state.mystate);
-	int direction1 = get_direction(1, current_state.mystate);
-	int direction2 = get_direction(2, current_state.mystate);
+	// // Lets get some variables from the current state
+	// int new_floor1 = get_floor(1, current_state.mystate);
+	// int new_floor2 = get_floor(2, current_state.mystate);
+	// int direction1 = get_direction(1, current_state.mystate);
+	// int direction2 = get_direction(2, current_state.mystate);
 	
-	int floor_button1 = 2*(new_floor1-1);
-	int floor_button2 = 2*(new_floor1-1)+1;
-	if(floor_button2 == 9)
-		floor_button2 = 0;
-	int floor_button3 = 2*(new_floor2-1);
-	int floor_button4 = 2*(new_floor2-1)+1;
-	if(floor_button4 == 9)
-		floor_button4 = 0;
-	if(floor_button_pressed(floor_button1) && direction1 == -1) {
-		string open_doors = "AOD1";
-		new_actions.push_back(open_doors);
-		string turn_off_button = "BO";
-		turn_off_button += floor_button1;
-		new_actions.push_back(turn_off_button);
-		string turn_off_lift_button = "BF";
-		turn_off_button += new_floor1;
-		turn_off_button += '1';
-		new_actions.push_back(turn_off_lift_button);
-		for(int i = 0; i < no_of_people; i++) {
-			if(get_location(i) == new_floor1) {
-				string change_location = "PL";
-				change_location += i;
-				change_location += P + 1;
-				new_actions.push_back(change_location);
-			}
-			if(get_destination(i) == new_floor1) {
-				string remove_person = "PO";
-				remove_person += i;
-				new_actions.push_back(remove_person);
-			}
-		}
-	}
-	else if(floor_button_pressed(floor_button2) && direction1 == 1) {
-		string open_doors = "AOU1";
-		new_actions.push_back(open_doors);
-		string turn_off_button = "BO";
-		turn_off_button += floor_button1;
-		new_actions.push_back(turn_off_button);
-		string turn_off_lift_button = "BF";
-		turn_off_button += new_floor1;
-		turn_off_button += '1';
-		new_actions.push_back(turn_off_lift_button);
-		for(int i = 0; i < no_of_people; i++) {
-			if(get_location(i) == new_floor1) {
-				string change_location = "PL";
-				change_location += i;
-				change_location += P + 1;
-				new_actions.push_back(change_location);
-			}
-			if(get_destination(i) == new_floor1) {
-				string remove_person = "PO";
-				remove_person += i;
-				new_actions.push_back(remove_person);
-			}
-		}
-	}
-	else if(doors_opened(1)) {
-		string doors_closed = "AC"
-		if(direction1 == 1)
-			doors_closed += 'U';
-		else if(direction1 == -1)
-			doors_closed += 'D';
-		doors_closed += new_floor1;
-		new_actions.push_back(doors_closed);
-		if(direction1 == 1)
-			new_floor1++;
-		else if(direction1 == -1)
-			new_floor1--;
-		string update_floor = "A1";
-		update_floor += new_floor1;
-		new_actions.push_back(update_floor);
-	}
-	else if(direction1 == 1 && any_lift_buttons_pressed_above(new_floor1)) {
-		new_floor1++;
-		string update_floor = "A1";
-		update_floor += new_floor1;
-		new_actions.push_back(update_floor);
-		string update_direction = "AU1";
-		new_actions.push_back(update_direction);
-	}
+	// int floor_button1 = 2*(new_floor1-1);
+	// int floor_button2 = 2*(new_floor1-1)+1;
+	// if(floor_button2 == 9)
+	// 	floor_button2 = 0;
+	// int floor_button3 = 2*(new_floor2-1);
+	// int floor_button4 = 2*(new_floor2-1)+1;
+	// if(floor_button4 == 9)
+	// 	floor_button4 = 0;
+	// if(floor_button_pressed(floor_button1) && direction1 == -1) {
+	// 	string open_doors = "AOD1";
+	// 	new_actions.push_back(open_doors);
+	// 	string turn_off_button = "BO";
+	// 	turn_off_button += floor_button1;
+	// 	new_actions.push_back(turn_off_button);
+	// 	string turn_off_lift_button = "BF";
+	// 	turn_off_button += new_floor1;
+	// 	turn_off_button += '1';
+	// 	new_actions.push_back(turn_off_lift_button);
+	// 	for(int i = 0; i < no_of_people; i++) {
+	// 		if(get_location(i) == new_floor1) {
+	// 			string change_location = "PL";
+	// 			change_location += i;
+	// 			change_location += P + 1;
+	// 			new_actions.push_back(change_location);
+	// 		}
+	// 		if(get_destination(i) == new_floor1) {
+	// 			string remove_person = "PO";
+	// 			remove_person += i;
+	// 			new_actions.push_back(remove_person);
+	// 		}
+	// 	}
+	// }
+	// else if(floor_button_pressed(floor_button2) && direction1 == 1) {
+	// 	string open_doors = "AOU1";
+	// 	new_actions.push_back(open_doors);
+	// 	string turn_off_button = "BO";
+	// 	turn_off_button += floor_button1;
+	// 	new_actions.push_back(turn_off_button);
+	// 	string turn_off_lift_button = "BF";
+	// 	turn_off_button += new_floor1;
+	// 	turn_off_button += '1';
+	// 	new_actions.push_back(turn_off_lift_button);
+	// 	for(int i = 0; i < no_of_people; i++) {
+	// 		if(get_location(i) == new_floor1) {
+	// 			string change_location = "PL";
+	// 			change_location += i;
+	// 			change_location += P + 1;
+	// 			new_actions.push_back(change_location);
+	// 		}
+	// 		if(get_destination(i) == new_floor1) {
+	// 			string remove_person = "PO";
+	// 			remove_person += i;
+	// 			new_actions.push_back(remove_person);
+	// 		}
+	// 	}
+	// }
+	// else if(doors_opened(1)) {
+	// 	string doors_closed = "AC"
+	// 	if(direction1 == 1)
+	// 		doors_closed += 'U';
+	// 	else if(direction1 == -1)
+	// 		doors_closed += 'D';
+	// 	doors_closed += new_floor1;
+	// 	new_actions.push_back(doors_closed);
+	// 	if(direction1 == 1)
+	// 		new_floor1++;
+	// 	else if(direction1 == -1)
+	// 		new_floor1--;
+	// 	string update_floor = "A1";
+	// 	update_floor += new_floor1;
+	// 	new_actions.push_back(update_floor);
+	// }
+	// else if(direction1 == 1 && any_lift_buttons_pressed_above(new_floor1)) {
+	// 	new_floor1++;
+	// 	string update_floor = "A1";
+	// 	update_floor += new_floor1;
+	// 	new_actions.push_back(update_floor);
+	// 	string update_direction = "AU1";
+	// 	new_actions.push_back(update_direction);
+	// }
 	
-	if(floor_button_pressed(floor_button3) && direction2 == -1) {
-		string open_doors = "AOD2";
-		new_actions.push_back(open_doors);
-		string turn_off_button = "BO";
-		turn_off_button += floor_button1;
-		new_actions.push_back(turn_off_button);
-		string turn_off_lift_button = "BF";
-		turn_off_button += new_floor2;
-		turn_off_button += '2';
-		new_actions.push_back(turn_off_lift_button);
-		for(int i = 0; i < no_of_people; i++) {
-			if(get_location(i) == new_floor2) {
-				string change_location = "PL";
-				change_location += i;
-				change_location += P + 2;
-				new_actions.push_back(change_location);
-			}
-			if(get_destination(i) == new_floor2) {
-				string remove_person = "PO";
-				remove_person += i;
-				new_actions.push_back(remove_person);
-			}
-		}
-	}
-	else if(floor_button_pressed(floor_button3) && direction2 == 1) {
-		string open_doors = "AOU2";
-		new_actions.push_back(open_doors);
-		string turn_off_button = "BO";
-		turn_off_button += floor_button1;
-		new_actions.push_back(turn_off_button);
-		string turn_off_lift_button = "BF";
-		turn_off_button += new_floor2;
-		turn_off_button += '2';
-		new_actions.push_back(turn_off_lift_button);
-		for(int i = 0; i < no_of_people; i++) {
-			if(get_location(i) == new_floor2) {
-				string change_location = "PL";
-				change_location += i;
-				change_location += P + 2;
-				new_actions.push_back(change_location);
-			}
-			if(get_destination(i) == new_floor2) {
-				string remove_person = "PO";
-				remove_person += i;
-				new_actions.push_back(remove_person);
-			}
-		}
-	}
-	else if(doors_opened(2)) {
-		string doors_closed = "AC"
-		if(direction2 == 1)
-			doors_closed += 'U';
-		else if(direction2 == -1)
-			doors_closed += 'D';
-		doors_closed += new_floor2;
-		new_actions.push_back(doors_closed);
-		if(direction2 == 1)
-			new_floor2++;
-		else if(direction2 == -1)
-			new_floor2--;
-		string update_floor = "A2";
-		update_floor += new_floor2;
-		new_actions.push_back(update_floor);
-	}
+	// if(floor_button_pressed(floor_button3) && direction2 == -1) {
+	// 	string open_doors = "AOD2";
+	// 	new_actions.push_back(open_doors);
+	// 	string turn_off_button = "BO";
+	// 	turn_off_button += floor_button1;
+	// 	new_actions.push_back(turn_off_button);
+	// 	string turn_off_lift_button = "BF";
+	// 	turn_off_button += new_floor2;
+	// 	turn_off_button += '2';
+	// 	new_actions.push_back(turn_off_lift_button);
+	// 	for(int i = 0; i < no_of_people; i++) {
+	// 		if(get_location(i) == new_floor2) {
+	// 			string change_location = "PL";
+	// 			change_location += i;
+	// 			change_location += P + 2;
+	// 			new_actions.push_back(change_location);
+	// 		}
+	// 		if(get_destination(i) == new_floor2) {
+	// 			string remove_person = "PO";
+	// 			remove_person += i;
+	// 			new_actions.push_back(remove_person);
+	// 		}
+	// 	}
+	// }
+	// else if(floor_button_pressed(floor_button3) && direction2 == 1) {
+	// 	string open_doors = "AOU2";
+	// 	new_actions.push_back(open_doors);
+	// 	string turn_off_button = "BO";
+	// 	turn_off_button += floor_button1;
+	// 	new_actions.push_back(turn_off_button);
+	// 	string turn_off_lift_button = "BF";
+	// 	turn_off_button += new_floor2;
+	// 	turn_off_button += '2';
+	// 	new_actions.push_back(turn_off_lift_button);
+	// 	for(int i = 0; i < no_of_people; i++) {
+	// 		if(get_location(i) == new_floor2) {
+	// 			string change_location = "PL";
+	// 			change_location += i;
+	// 			change_location += P + 2;
+	// 			new_actions.push_back(change_location);
+	// 		}
+	// 		if(get_destination(i) == new_floor2) {
+	// 			string remove_person = "PO";
+	// 			remove_person += i;
+	// 			new_actions.push_back(remove_person);
+	// 		}
+	// 	}
+	// }
+	// else if(doors_opened(2)) {
+	// 	string doors_closed = "AC"
+	// 	if(direction2 == 1)
+	// 		doors_closed += 'U';
+	// 	else if(direction2 == -1)
+	// 		doors_closed += 'D';
+	// 	doors_closed += new_floor2;
+	// 	new_actions.push_back(doors_closed);
+	// 	if(direction2 == 1)
+	// 		new_floor2++;
+	// 	else if(direction2 == -1)
+	// 		new_floor2--;
+	// 	string update_floor = "A2";
+	// 	update_floor += new_floor2;
+	// 	new_actions.push_back(update_floor);
+	// }
 }
 
 
