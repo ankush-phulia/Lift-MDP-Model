@@ -1,7 +1,7 @@
 #include "policy.h"
 
 
-void performAction(action ac, state &currentState){
+state performAction(action ac, state &currentState){
 
 }
 
