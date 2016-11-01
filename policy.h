@@ -8,8 +8,7 @@ typedef int action;
 typedef std::unordered_map<state,action> policy;
 //state->action is the policy --store everything??!!
 
-void doAction(action ac, state &currentState);
-void undoAction(action ac, state &currentState);
+void performAction(action ac, state &currentState);
 //do we really need this??!!!
 void genAllActions(std::vector<action> &actions,state &currentState);
 action getActionforState(policy &currentPolicy, state &currentState);
