@@ -20,9 +20,9 @@ public:
 	//etc
 	// uint64_t e1_dist;
 	// uint64_t e2_dist;
-	// //prob distr. of ppl wanting to get off at each floor - 12 bits per floor
+	//prob distr. of ppl wanting to get off at each floor - 12 bits per floor
 	// uint32_t *floor_dist;
-	// //prob distr. of ppl wanting to go up or down on each floor - 12 bits per direction
+	//prob distr. of ppl wanting to go up or down on each floor - 12 bits per direction
 	// int normalise;// normalising constant - 12 bit number
 
 	// state(int n);//constructor
@@ -95,6 +95,7 @@ public:
 		elevator ^= (1<<(16+5*(k-1)+n-1));		
 	}
 
+
 	// //methods for retrieving distribution
 	// inline float getProbElev(int n,int k){
 	// 	//prob a person in elevator k gets off at floor n
@@ -111,7 +112,7 @@ public:
 	// 	return ((floor_dist[n-1]>>12)&(4095))/normalise;
 	// }
 
-	// //methods for changing distributions
+	//methods for changing distributions
 	// void setProbElev(int k, int n, int newProb);
 	// void setProbFloUp(int n, int newProb);
 	// void setProbFloDown(int n, int newProb);

@@ -4,16 +4,16 @@ state::state(int n){
 
 	this->elevator = 0;
 
-	this->floor_dist = new uint32_t [n];
-    for (int i = 0;i<n;i++){
+	//this->floor_dist = new uint32_t [n];
+    //for (int i = 0;i<n;i++){
     	//initialise floor distribution probs
-    }
+    //}
 
     //initialise elevator distributions after this too
-    this->e1_dist = 0;
-    this->e2_dist = 0;
+    //this->e1_dist = 0;
+    //this->e2_dist = 0;
 
-    this->normalise = n*100;
+    //this->normalise = n*100;
 }
 
 void state::setFloor(int k, int n){
