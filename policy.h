@@ -1,6 +1,6 @@
 #ifndef POLICY_H
 #define POLICY_H
-#include "state.h"
+// #include "state.h"
 #include <unordered_map>
 
 typedef int action;

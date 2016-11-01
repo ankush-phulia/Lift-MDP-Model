@@ -28,11 +28,11 @@ public:
     // CONSTRUCTOR
 	simulate(int N, int K, float p, float q, float r, int t);
 
-	void perform_action(int action);
+	void perform_action(int);
 	state return_midstate();
 	void print_state();
-	void remove_person(int id);
-	void add_person(int id, int N, float q, float r);
+	void remove_person(int );
+	void add_person(int , int , float , float );
 };
 
 #endif

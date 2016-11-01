@@ -25,7 +25,7 @@ public:
 	//prob distr. of ppl wanting to go up or down on each floor - 12 bits per direction
 	// int normalise;// normalising constant - 12 bit number
 
-	// state(int n);//constructor
+	state();//constructor
 
 	//methods for retrieving elevators
 	inline int getFloor(int k){

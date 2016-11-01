@@ -20,16 +20,18 @@ void simulate::perform_action(int action) {
 	int action2 = action%10;
 	total_cost += WAIT_TIME_COST_FACTOR*people_in_sys.size();
 	switch(action1) {
-		case 0: {
- 			total_cost += UP_DOWN_COST_FACTOR;
- 			sim_state.setFloor(1, sim_state.getFloor(1) + 1);
-		}
 		case 1: {
  			total_cost += UP_DOWN_COST_FACTOR;
- 			sim_state.setFloor(1, sim_state.getFloor(1) - 1);
+ 			sim_state.setFloor(1, sim_state.getFloor(1) + 1);
+ 			break;
 		}
-		case 3: {
-			sim_state.turnOffElevatorButton(1,sim_state.getFloor(1));
+		case 2: {
+ 			total_cost += UP_DOWN_COST_FACTOR;
+ 			sim_state.setFloor(1, sim_state.getFloor(1) - 1);
+ 			break;
+		}
+		case 4: {
+			sim_state.turnOffElevatorButton(sim_state.getFloor(1), 1);
 			sim_state.turnOffFloorButton(sim_state.getFloor(1), 1);
 			for(int i = 0; i < people_in_sys.size(); i++) {
 				if(people_in_sys[i].dest == sim_state.getFloor(1) && people_in_sys[i].elevator_number == 1) {
@@ -40,9 +42,10 @@ void simulate::perform_action(int action) {
 					sim_state.turnOnElevatorButton(people_in_sys[i].dest, 1);
 				}
 			}
+			break;
 		}
-		case 4: {
-			sim_state.turnOffElevatorButton(1,sim_state.getFloor(1));
+		case 5: {
+			sim_state.turnOffElevatorButton(sim_state.getFloor(1), 1);
 			sim_state.turnOffFloorButton(sim_state.getFloor(1), 0);
 			for(int i = 0; i < people_in_sys.size(); i++) {
 				if(people_in_sys[i].dest == sim_state.getFloor(1) && people_in_sys[i].elevator_number == 1) {
@@ -53,19 +56,22 @@ void simulate::perform_action(int action) {
 					sim_state.turnOnElevatorButton(people_in_sys[i].dest, 1);
 				}
 			}
+			break;
 		}
 	}
 	switch(action2) {
-		case 0: {
- 			total_cost += UP_DOWN_COST_FACTOR;
- 			sim_state.setFloor(2, sim_state.getFloor(2) + 1);
-		}
 		case 1: {
  			total_cost += UP_DOWN_COST_FACTOR;
- 			sim_state.setFloor(2, sim_state.getFloor(2) - 1);
+ 			sim_state.setFloor(2, sim_state.getFloor(2) + 1);
+ 			break;
 		}
-		case 3: {
-			sim_state.turnOffElevatorButton(2, sim_state.getFloor(2));
+		case 2: {
+ 			total_cost += UP_DOWN_COST_FACTOR;
+ 			sim_state.setFloor(2, sim_state.getFloor(2) - 1);
+ 			break;
+		}
+		case 4: {
+			sim_state.turnOffElevatorButton(sim_state.getFloor(2), 2);
 			sim_state.turnOffFloorButton(sim_state.getFloor(2), 1);
 			for(int i = 0; i < people_in_sys.size(); i++) {
 				if(people_in_sys[i].dest == sim_state.getFloor(2) && people_in_sys[i].elevator_number == 2) {
@@ -76,9 +82,10 @@ void simulate::perform_action(int action) {
 					sim_state.turnOnElevatorButton(people_in_sys[i].dest, 2);
 				}
 			}
+			break;
 		}
-		case 4: {
-			sim_state.turnOffElevatorButton(2,sim_state.getFloor(2));
+		case 5: {
+			sim_state.turnOffElevatorButton(sim_state.getFloor(2), 2);
 			sim_state.turnOffFloorButton(sim_state.getFloor(2), 0);
 			for(int i = 0; i < people_in_sys.size(); i++) {
 				if(people_in_sys[i].dest == sim_state.getFloor(2) && people_in_sys[i].elevator_number == 2) {
@@ -86,9 +93,10 @@ void simulate::perform_action(int action) {
 				}
 				if(people_in_sys[i].start == sim_state.getFloor(2) && people_in_sys[i].elevator_number == -1 && people_in_sys[i].direction == 0) {
 					people_in_sys[i].elevator_number = 2;
-					sim_state.turnOnElevatorButton(people_in_sys[i].dest, 1);
+					sim_state.turnOnElevatorButton(people_in_sys[i].dest, 2);
 				}
 			}
+			break;
 		}
 	}
 	int random = rand()%100 + 1;
@@ -123,6 +131,12 @@ void simulate::print_state() {
 		}
 		cout<<endl;
 	}	
+	for(int i = 0; i <people_in_sys.size(); i++) {
+		cout<<"Person "<<people_in_sys[i].id<<endl;
+		cout<<"Start = "<<people_in_sys[i].start<<endl;
+		cout<<"Dest = "<<people_in_sys[i].dest<<endl;
+		cout<<"Evel = "<<people_in_sys[i].elevator_number<<endl;
+	}
 }
 
 void simulate::remove_person(int id) {
