@@ -26,7 +26,7 @@ class node {
 	// state space
 	state mystate;
 	// Link to states
-	vector<node> links;
+	vector<*node> links;
 
 	node(node new_state) {
 		mystate.elevator = new_state.elevator;
@@ -66,7 +66,7 @@ node perform_input_action(vector<string> actions, node current_node) {
 
 	if(midway_node.mystate.isOpen(1)) {
 		int floor = midway_node.mystate.getFloor(1);
-		int direction = midway_node.mystate.getDirection(1)%2;
+		int direction = midway_node.mystate.getDirection(1)%3;
 		midway_node.mystate.turnOffFloorButton(floor, direction);
 		float floor_prob;
 		vector<int> elevator_buttons;
@@ -131,7 +131,7 @@ node perform_input_action(vector<string> actions, node current_node) {
 
 	if(midway_node.mystate.isOpen(2)) {
 		int floor = midway_node.mystate.getFloor(2);
-		int direction = midway_node.mystate.getDirection(2)%2;
+		int direction = midway_node.mystate.getDirection(2)%3;
 		midway_node.mystate.turnOffFloorButton(floor, direction);
 		float floor_prob;
 		vector<int> elevator_buttons;
@@ -244,10 +244,302 @@ node perform_input_action(vector<string> actions, node current_node) {
 	return midway_node;
 }
 
-void generate_actions();
+// Action enocding
+/* 
+	FIRST 4 bits Elevator 1
+	SECOND 4 bits Elevator 2
+	0010 - UP - 0
+	0100 - DOWN - 1
+	1000 - STILL - 2
+	0000 - OPENUP - 3
+	0001 - OPENDOWN - 4
+*/ 
+void get_action1(vector<int> &actions, node midway_node) {
+// Lets get some variables from the current state
+	int floor1 = midway_node.mystate.getFloor(1);
+	int direction1 = midway_node.mystate.getDirection(1)%3;
+
+	if(midway_node.mystate.elevatorButtonPressed(1, floor1)) {
+		if(direction1) {
+			bool pressed = false;
+			for(int i = floor1 + 1; i <= N; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(1, i)) {
+					pressed = true;
+					break;
+				}
+			}
+			if(pressed) {
+				actions.push_back(3);
+			}
+			else {
+				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+						actions.push_back(3);
+				}
+				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+						actions.push_back(4);
+				}	
+				else{
+					if(floor1 != 5)
+						actions.push_back(3);
+					if(floor1 != 1)
+						actions.push_back(4);
+				}
+			}
+		}
+		if(!direction1) {
+			bool pressed = false;
+			for(int i = 0; i < floor1; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(1, i)) {
+					pressed = true;
+					break;
+				}
+			}
+			if(pressed) {
+				actions.push_back(4);
+			}
+			else {
+				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+						actions.push_back(3);
+				}
+				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+						actions.push_back(4);
+				}	
+				else{
+					if(floor1 != 5)
+						actions.push_back(3);
+					if(floor1 != 1)
+						actions.push_back(4);
+				}
+			}
+		}
+	}
+	else {
+		bool pressed_up = false;
+		bool pressed_down = false;
+		for(int i = floor1 + 1; i <= N; i++) {
+			if(midway_node.mystate.elevatorButtonPressed(1, i)) {
+				pressed_up = true;
+				break;
+			}
+		}
+		for(int i = 1; i < floor1; i++) {
+			if(midway_node.mystate.elevatorButtonPressed(1, i)) {
+				pressed_down = true;
+				break;
+			}
+		}
+		if(pressed_up) {
+			if(midway_node.mystate.floorButtonPressed(floor1, 1)) {
+				actions.push_back(3);
+			}
+			else {
+				actions.push_back(0);
+			}
+		}
+		if(pressed_down) {
+			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
+				actions.push_back(4);
+			}
+			else {
+				actions.push_back(1);
+			}
+		}
+		else {
+			if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+					actions.push_back(3);
+			}
+			else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+					actions.push_back(4);
+			}
+			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5)) {
+				actions.push_back(3);
+				actions.push_back(4);
+			}
+			else {
+				actions.push_back(2);
+				bool any_floor_button_pressed_below = false;
+				bool any_floor_button_pressed_above = false;
+				for(int i = 1; i <= N; i++) {
+					if(midway_node.mystate.floorButtonPressed(i, 1) && i != 5) {
+						if(i > floor1)
+							any_floor_button_pressed_above = true;
+						else
+							any_floor_button_pressed_below = true;
+					}
+					if(midway_node.mystate.floorButtonPressed(i, 0) && i != 1) {
+						if(i > floor1)
+							any_floor_button_pressed_above = true;
+						else
+							any_floor_button_pressed_below = true;
+					}
+					if(any_floor_button_pressed_above)
+						actions.push_back(0);
+					if(any_floor_button_pressed_below)
+						actions.push_back(1);
+				}
+			}
+		}
+	}
+}
+
+void get_action2(vector<int> &actions, node midway_node) {
+// Lets get some variables from the current state
+	int floor1 = midway_node.mystate.getFloor(2);
+	int direction1 = midway_node.mystate.getDirection(2)%3;
+
+	if(midway_node.mystate.elevatorButtonPressed(2, floor1)) {
+		if(direction1) {
+			bool pressed = false;
+			for(int i = floor1 + 1; i <= N; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(2, i)) {
+					pressed = true;
+					break;
+				}
+			}
+			if(pressed) {
+				actions.push_back(3);
+			}
+			else {
+				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+						actions.push_back(3);
+				}
+				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+						actions.push_back(4);
+				}	
+				else{
+					if(floor1 != 5)
+						actions.push_back(3);
+					if(floor1 != 1)
+						actions.push_back(4);
+				}
+			}
+		}
+		if(!direction1) {
+			bool pressed = false;
+			for(int i = 0; i < floor1; i++) {
+				if(midway_node.mystate.elevatorButtonPressed(2, i)) {
+					pressed = true;
+					break;
+				}
+			}
+			if(pressed) {
+				actions.push_back(4);
+			}
+			else {
+				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+						actions.push_back(3);
+				}
+				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+						actions.push_back(4);
+				}	
+				else{
+					if(floor1 != 5)
+						actions.push_back(3);
+					if(floor1 != 1)
+						actions.push_back(4);
+				}
+			}
+		}
+	}
+	else {
+		bool pressed_up = false;
+		bool pressed_down = false;
+		for(int i = floor1 + 1; i <= N; i++) {
+			if(midway_node.mystate.elevatorButtonPressed(2, i)) {
+				pressed_up = true;
+				break;
+			}
+		}
+		for(int i = 1; i < floor1; i++) {
+			if(midway_node.mystate.elevatorButtonPressed(2, i)) {
+				pressed_down = true;
+				break;
+			}
+		}
+		if(pressed_up) {
+			if(midway_node.mystate.floorButtonPressed(floor1, 1)) {
+				actions.push_back(3);
+			}
+			else {
+				actions.push_back(0);
+			}
+		}
+		if(pressed_down) {
+			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
+				actions.push_back(4);
+			}
+			else {
+				actions.push_back(1);
+			}
+		}
+		else {
+			if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+					actions.push_back(3);
+			}
+			else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+					actions.push_back(4);
+			}
+			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5)) {
+				actions.push_back(3);
+				actions.push_back(4);
+			}
+			else {
+				actions.push_back(2);
+				bool any_floor_button_pressed_below = false;
+				bool any_floor_button_pressed_above = false;
+				for(int i = 1; i <= N; i++) {
+					if(midway_node.mystate.floorButtonPressed(i, 1) && i != 5) {
+						if(i > floor1)
+							any_floor_button_pressed_above = true;
+						else
+							any_floor_button_pressed_below = true;
+					}
+					if(midway_node.mystate.floorButtonPressed(i, 0) && i != 1) {
+						if(i > floor1)
+							any_floor_button_pressed_above = true;
+						else
+							any_floor_button_pressed_below = true;
+					}
+					if(any_floor_button_pressed_above)
+						actions.push_back(0);
+					if(any_floor_button_pressed_below)
+						actions.push_back(1);
+				}
+			}
+		}
+	}
+}
+
+void generate_actions(vector<uint8_t> &actions, node midway_node) {
+	vector<int> action1;
+	vector<int> action2;
+	get_action1(action1, midway_node);
+	get_action2(action2, midway_node);
+
+	for(int i = 0; i < action1.size(); i++) {
+		for(int j = 0; j < action2.size(); j++) {
+			uint8_t encoded = getencoding(action1[i], action2[i]);
+			actions.push_back(encoded);
+		}
+	}
+}
 
 // PERFORM ACTION
-node perform_output_action(vector<string> actions, node midway_node) {
+node perform_output_action(vector<uint8_t> actions, node midway_node) {
+	
+	node final_node(midway_node);
 
 	// Lets get some variables from the current state
 	int new_floor1 = get_floor(1, current_state.mystate);
@@ -459,7 +751,7 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 				input_action.push_back(myaction);
 			}
 		}
-		int direction = curr_node.mystate.getDirection(0);
+		int direction = curr_node.mystate.getDirection(0)%3;
 		float prob;
 		if(direction == 1)
 			prob = curr_node.mystate.getProbFloUp(curr_node.mystate.getFloor(0));
@@ -468,7 +760,7 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 		if(flag1 == 1) {
 			buttons1.clear();
 			for(int j = 0; j < N; j++) {
-				if(!curr_node.mystate.elevatorButtonPressed(0,j) && ((curr_node.mystate.getDirection(0)%2 == 1 && j >= curr_node.mystate.getFloor(0)) || (curr_node.mystate.getDirection(0)%2 == 0 && j-1 < curr_node.mystate.getFloor(0)))) {
+				if(!curr_node.mystate.elevatorButtonPressed(0,j) && ((curr_node.mystate.getDirection(0)%3 == 1 && j >= curr_node.mystate.getFloor(0)) || (curr_node.mystate.getDirection(0)%3 == 0 && j-1 < curr_node.mystate.getFloor(0)))) {
 					buttons1.push_back(j);
 				}
 			}
@@ -490,7 +782,7 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 				else {
 					buttons2.clear();
 					for(int j = 0; j < N; j++) {
-						if(!curr_node.mystate.elevatorButtonPressed(1,j) && ((curr_node.mystate.getDirection(1)%2 == 1 && j >= curr_node.mystate.getFloor(1)) || (curr_node.mystate.getDirection(1)%2 == 0 && j-1 < curr_node.mystate.getFloor(1)))) {
+						if(!curr_node.mystate.elevatorButtonPressed(1,j) && ((curr_node.mystate.getDirection(1)%3 == 1 && j >= curr_node.mystate.getFloor(1)) || (curr_node.mystate.getDirection(1)%3 == 0 && j-1 < curr_node.mystate.getFloor(1)))) {
 							buttons2.push_back(j);
 						}
 					}
@@ -515,7 +807,7 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 		else if(flag2 == 1) {
 			buttons2.clear();
 			for(int j = 0; j < N; j++) {
-				if(!curr_node.mystate.elevatorButtonPressed(1,j) && ((curr_node.mystate.getDirection(1)%2 == 1 && j >= curr_node.mystate.getFloor(1)) || (curr_node.mystate.getDirection(1)%2 == 0 && j-1 < curr_node.mystate.getFloor(1)))) {
+				if(!curr_node.mystate.elevatorButtonPressed(1,j) && ((curr_node.mystate.getDirection(1)%3 == 1 && j >= curr_node.mystate.getFloor(1)) || (curr_node.mystate.getDirection(1)%3 == 0 && j-1 < curr_node.mystate.getFloor(1)))) {
 					buttons2.push_back(j);
 				}
 			}
