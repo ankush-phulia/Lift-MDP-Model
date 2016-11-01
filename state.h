@@ -1,11 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
-#include "bits/stdc++.h"
-#include <bitset>
-#include <vector>
+#include <stdlib.h>
 
-using namespace std;
-
+// using namespace std;
 
 class state{
 
@@ -28,7 +25,7 @@ public:
 	//prob distr. of ppl wanting to go up or down on each floor - 12 bits per direction
 	// int normalise;// normalising constant - 12 bit number
 
-	state(int n);//constructor
+	state();//constructor
 
 	//methods for retrieving elevators
 	inline int getFloor(int k){
@@ -36,19 +33,19 @@ public:
 		return (elevator>>(3*(k-1)))&7;
 	}
 	inline bool isOpen(int k){
-		return (elevator>>(30+k-1))&1==1;
+		return ((elevator>>(30+k-1))&1)==1;
 	}
 	inline int getDirection(int k){
 		return (elevator>>(26+2*k-2))&3;
 	}
 	inline bool elevatorButtonPressed(int k, int n){
 		//k = 1,2 ; n = 1,2,3,4,5
-		return (elevator>>(16+5*(k-1)+n-1))&1==1;
+		return ((elevator>>(16+5*(k-1)+n-1))&1)==1;
 	}
 	inline bool floorButtonPressed(int n, int upordown){
 		//make upordown bool??!!
 		//careful when using button for floor 1 or 5, always give upordown as 0 or false
-		return (elevator>>(6+2*(n-1)+upordown))&1==1;
+		return ((elevator>>(6+2*(n-1)+upordown))&1)==1;
 	}
 
 	//methods for changing elevators
@@ -98,7 +95,8 @@ public:
 		elevator ^= (1<<(16+5*(k-1)+n-1));		
 	}
 
-	//methods for retrieving distribution
+
+	// //methods for retrieving distribution
 	// inline float getProbElev(int n,int k){
 	// 	//prob a person in elevator k gets off at floor n
 	// 	return (k==1)?(((e1_dist>>(12*(n-1)))&(4095))/normalise):(((e2_dist>>(12*n-12))&(4095))/normalise);

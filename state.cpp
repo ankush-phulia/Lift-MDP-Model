@@ -1,9 +1,10 @@
 #include "state.h"
 
-state::state(int n){
+state::state(){
 
 	this->elevator = 0;
-
+	setFloor(1,1);
+	setFloor(2,1);
 	//this->floor_dist = new uint32_t [n];
     //for (int i = 0;i<n;i++){
     	//initialise floor distribution probs
