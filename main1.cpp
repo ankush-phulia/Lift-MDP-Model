@@ -269,22 +269,22 @@ void get_action1(vector<int> &actions, node midway_node) {
 				}
 			}
 			if(pressed) {
-				actions.push_back(3);
+				actions.push_back(4);
 			}
 			else {
 				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
-						actions.push_back(3);
+						actions.push_back(4);
 				}
 				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
-						actions.push_back(4);
+						actions.push_back(5);
 				}	
 				else{
 					if(floor1 != 5)
-						actions.push_back(3);
-					if(floor1 != 1)
 						actions.push_back(4);
+					if(floor1 != 1)
+						actions.push_back(5);
 				}
 			}
 		}
@@ -302,17 +302,17 @@ void get_action1(vector<int> &actions, node midway_node) {
 			else {
 				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
-						actions.push_back(3);
+						actions.push_back(4);
 				}
 				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
-						actions.push_back(4);
+						actions.push_back(5);
 				}	
 				else{
 					if(floor1 != 5)
-						actions.push_back(3);
-					if(floor1 != 1)
 						actions.push_back(4);
+					if(floor1 != 1)
+						actions.push_back(5);
 				}
 			}
 		}
@@ -334,35 +334,35 @@ void get_action1(vector<int> &actions, node midway_node) {
 		}
 		if(pressed_up) {
 			if(midway_node.mystate.floorButtonPressed(floor1, 1)) {
-				actions.push_back(3);
-			}
-			else {
-				actions.push_back(0);
-			}
-		}
-		if(pressed_down) {
-			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
 				actions.push_back(4);
 			}
 			else {
 				actions.push_back(1);
 			}
 		}
-		else {
-			if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
-			 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
-					actions.push_back(3);
-			}
-			else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
-			 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
-					actions.push_back(4);
-			}
-			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5)) {
-				actions.push_back(3);
-				actions.push_back(4);
+		if(pressed_down) {
+			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
+				actions.push_back(5);
 			}
 			else {
 				actions.push_back(2);
+			}
+		}
+		else {
+			if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+					actions.push_back(4);
+			}
+			else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+					actions.push_back(5);
+			}
+			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5)) {
+				actions.push_back(4);
+				actions.push_back(5);
+			}
+			else {
+				actions.push_back(3);
 				bool any_floor_button_pressed_below = false;
 				bool any_floor_button_pressed_above = false;
 				for(int i = 1; i <= N; i++) {
@@ -379,9 +379,9 @@ void get_action1(vector<int> &actions, node midway_node) {
 							any_floor_button_pressed_below = true;
 					}
 					if(any_floor_button_pressed_above)
-						actions.push_back(0);
-					if(any_floor_button_pressed_below)
 						actions.push_back(1);
+					if(any_floor_button_pressed_below)
+						actions.push_back(2);
 				}
 			}
 		}
@@ -403,22 +403,22 @@ void get_action2(vector<int> &actions, node midway_node) {
 				}
 			}
 			if(pressed) {
-				actions.push_back(3);
+				actions.push_back(4);
 			}
 			else {
 				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
-						actions.push_back(3);
+						actions.push_back(4);
 				}
 				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
-						actions.push_back(4);
+						actions.push_back(5);
 				}	
 				else{
 					if(floor1 != 5)
-						actions.push_back(3);
-					if(floor1 != 1)
 						actions.push_back(4);
+					if(floor1 != 1)
+						actions.push_back(5);
 				}
 			}
 		}
@@ -431,22 +431,22 @@ void get_action2(vector<int> &actions, node midway_node) {
 				}
 			}
 			if(pressed) {
-				actions.push_back(4);
+				actions.push_back(5);
 			}
 			else {
 				if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
-						actions.push_back(3);
+						actions.push_back(4);
 				}
 				else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
 				 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
-						actions.push_back(4);
+						actions.push_back(5);
 				}	
 				else{
 					if(floor1 != 5)
-						actions.push_back(3);
-					if(floor1 != 1)
 						actions.push_back(4);
+					if(floor1 != 1)
+						actions.push_back(5);
 				}
 			}
 		}
@@ -468,35 +468,35 @@ void get_action2(vector<int> &actions, node midway_node) {
 		}
 		if(pressed_up) {
 			if(midway_node.mystate.floorButtonPressed(floor1, 1)) {
-				actions.push_back(3);
-			}
-			else {
-				actions.push_back(0);
-			}
-		}
-		if(pressed_down) {
-			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
 				actions.push_back(4);
 			}
 			else {
 				actions.push_back(1);
 			}
 		}
-		else {
-			if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
-			 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
-					actions.push_back(3);
-			}
-			else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
-			 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
-					actions.push_back(4);
-			}
-			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5)) {
-				actions.push_back(3);
-				actions.push_back(4);
+		if(pressed_down) {
+			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
+				actions.push_back(5);
 			}
 			else {
 				actions.push_back(2);
+			}
+		}
+		else {
+			if(midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)
+					actions.push_back(4);
+			}
+			else if(midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) {
+			 	if(!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == 5)
+					actions.push_back(5);
+			}
+			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != 5)) {
+				actions.push_back(4);
+				actions.push_back(5);
+			}
+			else {
+				actions.push_back(3);
 				bool any_floor_button_pressed_below = false;
 				bool any_floor_button_pressed_above = false;
 				for(int i = 1; i <= N; i++) {
@@ -513,9 +513,9 @@ void get_action2(vector<int> &actions, node midway_node) {
 							any_floor_button_pressed_below = true;
 					}
 					if(any_floor_button_pressed_above)
-						actions.push_back(0);
-					if(any_floor_button_pressed_below)
 						actions.push_back(1);
+					if(any_floor_button_pressed_below)
+						actions.push_back(2);
 				}
 			}
 		}
