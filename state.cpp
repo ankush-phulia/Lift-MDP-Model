@@ -24,7 +24,7 @@ void state::setFloor(int k, int n){
 
 
 void state::setDirection(int k, int dir){
-	//00 for static, 01 for up, 10 for down
+	//10 for static, 01 for up, 00 for down
 	int mask = (4294967295)^(3<<(26+2*k-2));
 	elevator &= mask;
 	elevator |= (dir<<(26+2*k-2));
