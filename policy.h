@@ -3,12 +3,12 @@
 #include "state.h"
 #include <unordered_map>
 
-typedef int action;
+typedef uint8_t action;
 //some encoding for action
 typedef std::unordered_map<int,action> Policy;
 //state->action is the policy --store everything??!!
 
-void performAction(action ac, state &currentState);
+state performAction(uint8_t ac, state &currentState);
 //do we really need this??!!!
 void genAllActions(std::vector<action> &actions,state &currentState);
 action getActionforState(Policy &currentPolicy, state &currentState);
