@@ -30,26 +30,26 @@ void state::setDirection(int k, int dir){
 	elevator |= (dir<<(26+2*k-2));
 }
 
-void state::setProbElev(int k, int n, int newProb){
-	int mask = (4294967295)^(4095<<(12*n-12));
-	if (k==1){
-		e1_dist &= mask;
-		e1_dist |= (newProb<<(12*n-12));
-	}
-	else{
-		e2_dist &= mask;
-		e2_dist |= (newProb<<(12*n-12));
-	}
-}
+// void state::setProbElev(int k, int n, int newProb){
+// 	int mask = (4294967295)^(4095<<(12*n-12));
+// 	if (k==1){
+// 		e1_dist &= mask;
+// 		e1_dist |= (newProb<<(12*n-12));
+// 	}
+// 	else{
+// 		e2_dist &= mask;
+// 		e2_dist |= (newProb<<(12*n-12));
+// 	}
+// }
 
-void state::setProbFloUp(int n, int newProb){
-	int mask = (4294967295)^(4095);
-	floor_dist[n-1] &= mask;
-	floor_dist[n-1] |= (newProb);
-}
+// void state::setProbFloUp(int n, int newProb){
+// 	int mask = (4294967295)^(4095);
+// 	floor_dist[n-1] &= mask;
+// 	floor_dist[n-1] |= (newProb);
+// }
 
-void state::setProbFloDown(int n, int newProb){
-	int mask = (4294967295)^(4095<<12);
-	floor_dist[n-1] &= mask;
-	floor_dist[n-1] |= (newProb<<12);
-}
+// void state::setProbFloDown(int n, int newProb){
+// 	int mask = (4294967295)^(4095<<12);
+// 	floor_dist[n-1] &= mask;
+// 	floor_dist[n-1] |= (newProb<<12);
+// }
