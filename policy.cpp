@@ -9,11 +9,11 @@ void genAllActions(std::vector<action> &actions,state &currentState){
 	
 }
 
-// action policy::getActionforState(policy &currentPolicy, state &currentState){
-// 	//not sure about correctness
-// 	return currentPolicy[currentState];
-// }
+action getActionforState(Policy &currentPolicy, int currentState){
+	//not sure about correctness
+	return currentPolicy[currentState];
+}
 
-// void policy::updatePolicy(action newAction, policy &currentPolicy, state &currentState){
-// 	currentPolicy[currentState] = newAction;
-// }
+void updatePolicy(action newAction, Policy &currentPolicy, int currentState){
+	currentPolicy[currentState] = newAction;
+}

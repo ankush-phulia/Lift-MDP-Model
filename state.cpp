@@ -4,16 +4,16 @@ state::state(int n){
 
 	this->elevator = 0;
 
-	this->floor_dist = new uint32_t [n];
-    for (int i = 0;i<n;i++){
+	//this->floor_dist = new uint32_t [n];
+    //for (int i = 0;i<n;i++){
     	//initialise floor distribution probs
-    }
+    //}
 
     //initialise elevator distributions after this too
-    this->e1_dist = 0;
-    this->e2_dist = 0;
+    //this->e1_dist = 0;
+    //this->e2_dist = 0;
 
-    this->normalise = n*100;
+    //this->normalise = n*100;
 }
 
 void state::setFloor(int k, int n){
@@ -30,26 +30,26 @@ void state::setDirection(int k, int dir){
 	elevator |= (dir<<(26+2*k-2));
 }
 
-void state::setProbElev(int k, int n, int newProb){
-	int mask = (4294967295)^(4095<<(12*n-12));
-	if (k==1){
-		e1_dist &= mask;
-		e1_dist |= (newProb<<(12*n-12));
-	}
-	else{
-		e2_dist &= mask;
-		e2_dist |= (newProb<<(12*n-12));
-	}
-}
+// void state::setProbElev(int k, int n, int newProb){
+// 	int mask = (4294967295)^(4095<<(12*n-12));
+// 	if (k==1){
+// 		e1_dist &= mask;
+// 		e1_dist |= (newProb<<(12*n-12));
+// 	}
+// 	else{
+// 		e2_dist &= mask;
+// 		e2_dist |= (newProb<<(12*n-12));
+// 	}
+// }
 
-void state::setProbFloUp(int n, int newProb){
-	int mask = (4294967295)^(4095);
-	floor_dist[n-1] &= mask;
-	floor_dist[n-1] |= (newProb);
-}
+// void state::setProbFloUp(int n, int newProb){
+// 	int mask = (4294967295)^(4095);
+// 	floor_dist[n-1] &= mask;
+// 	floor_dist[n-1] |= (newProb);
+// }
 
-void state::setProbFloDown(int n, int newProb){
-	int mask = (4294967295)^(4095<<12);
-	floor_dist[n-1] &= mask;
-	floor_dist[n-1] |= (newProb<<12);
-}
+// void state::setProbFloDown(int n, int newProb){
+// 	int mask = (4294967295)^(4095<<12);
+// 	floor_dist[n-1] &= mask;
+// 	floor_dist[n-1] |= (newProb<<12);
+// }
