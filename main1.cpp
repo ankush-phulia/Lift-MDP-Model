@@ -1,6 +1,12 @@
-#include "uct.h"
+#include "state.h"
 #include <iostream>
-#include <bitset>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <string>
+#include <math.h>
+
 
 using namespace std;
 
@@ -10,7 +16,11 @@ using namespace std;
 // q - probabilty arrives at floor 1
 // r - probabilty destination is floor 1
 
-static int N, K, p, q, r;
+static int N, K, p, q, r, t;
+const int WAIT_TIME_COST_FACTOR = 2;
+const int UP_DOWN_COST_FACTOR = 1;
+static float total_cost = 0; 
+static int rollout = 10;
 
 // Used in generating next possible outputs from a given state
 static double comb_count1 = 0, comb_count2 = 0;
@@ -23,21 +33,26 @@ vector<vector<int>> all_combinations2;
 
 // Create a class of states
 class node {
+public:
 	// state space
 	state mystate;
 	// Link to states
-	vector<*node> links;
+	// vector<*node> links;
 
-	node(node new_state) {
-		mystate.elevator = new_state.elevator;
-		mystate.e0_dist = new_state.e0_dist;
-		mystate.e1_dist = new_state.e1_dist;
-		for(int i = 0; i < P; i++) {
-			mystate.floor_dist[i] = new_state.floor_dist[i];
+	node(const node &new_state) {
+		mystate.elevator = new_state.mystate.elevator;
+		mystate.e1_dist = new_state.mystate.e1_dist;
+		mystate.e2_dist = new_state.mystate.e2_dist;
+		for(int i = 0; i < N; i++) {
+			mystate.floor_dist[i] = new_state.mystate.floor_dist[i];
 		}
-		mystate.normalise = new_state.normalise;
+		mystate.normalise = new_state.mystate.normalise;
 	}
-}initial_state, current_state;
+
+	node() {
+
+	}
+};
 
 // APPLY BUTTON PUSHES
 node perform_input_action(vector<string> actions, node current_node) {
@@ -91,13 +106,13 @@ node perform_input_action(vector<string> actions, node current_node) {
 		int size = elevator_buttons.size();
 		if(buttons_pressed1 == 0) {
 			for(int i = 0; i < size; i++) {
-				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 0);
+				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 1);
 				float prob = elev_prob + floor_prob / size;
 				midway_node.mystate.setProbElev(1, elevator_buttons[i], prob);
 			}
 		}
 		else {
-			if(floor_prob > buttons_pressed) {
+			if(floor_prob > buttons_pressed1) {
 				int total_buttons_pressed = buttons_pressed1 + elevator_buttons.size();
 				floor_prob = floor_prob - buttons_pressed1;
 				for(int i = 0; i < buttons_pressed1; i++) {
@@ -111,11 +126,11 @@ node perform_input_action(vector<string> actions, node current_node) {
 				}
 				for(int i = 0; i < elevator_buttons.size(); i++) {
 					float elev_floor_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 1);
-					if(floor_no == 1)
+					if(elevator_buttons[i] == 1)
 						elev_floor_prob += (floor_prob*r);
 					if(floor1_elev1_flag)
 						elev_floor_prob += (floor_prob*(1-r)/(total_buttons_pressed-1));
-					midway_node.mystate.setProbElev(1, floor_no, elev_floor_prob);
+					midway_node.mystate.setProbElev(1, elevator_buttons[i], elev_floor_prob);
 				}
 			}
 			else {
@@ -127,6 +142,7 @@ node perform_input_action(vector<string> actions, node current_node) {
 				}
 			}
 		}
+		midway_node.mystate.setProbElev(1, floor, 0.0);
 	}
 
 	if(midway_node.mystate.isOpen(2)) {
@@ -156,13 +172,13 @@ node perform_input_action(vector<string> actions, node current_node) {
 		int size = elevator_buttons.size();
 		if(buttons_pressed2 == 0) {
 			for(int i = 0; i < size; i++) {
-				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 0);
+				float elev_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 2);
 				float prob = elev_prob + floor_prob / size;
 				midway_node.mystate.setProbElev(2, elevator_buttons[i], prob);
 			}
 		}
 		else {
-			if(floor_prob > buttons_pressed) {
+			if(floor_prob > buttons_pressed2) {
 				int total_buttons_pressed = buttons_pressed2 + elevator_buttons.size();
 				floor_prob = floor_prob - buttons_pressed2;
 				for(int i = 0; i < buttons_pressed2; i++) {
@@ -176,30 +192,31 @@ node perform_input_action(vector<string> actions, node current_node) {
 				}
 				for(int i = 0; i < elevator_buttons.size(); i++) {
 					float elev_floor_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 2);
-					if(floor_no == 1)
+					if(elevator_buttons[i] == 1)
 						elev_floor_prob += (floor_prob*r);
 					if(floor1_elev2_flag)
 						elev_floor_prob += (floor_prob*(1-r)/(total_buttons_pressed-1));
-					midway_node.mystate.setProbElev(2, floor_no, elev_floor_prob);
+					midway_node.mystate.setProbElev(2, elevator_buttons[i], elev_floor_prob);
 				}
 			}
 			else {
 				for(int i = 0; i < buttons_pressed1; i++) {
 					int floor_no = elevator2_button_actions[i][3];
-					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 1);
+					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 2);
 					elev_floor_prob += (1.0);
 					midway_node.mystate.setProbElev(2, floor_no, elev_floor_prob);
 				}
 			}
 		}
+		midway_node.mystate.setProbElev(2, floor, 0.0);
 	}
 
-	if(action[0][0] == '0') {
+	if(actions[0][0] == '0') {
 		bool flag = false;
 		for(int j = 0; j < N; j++) {
-			if(midway_node.mystate.floor_button_pressed(0, 0) && j != 0)
+			if(midway_node.mystate.floorButtonPressed(0, 0) && j != 0)
 				floor_buttons.push_back(2*j-1);
-			if(midway_node.mystate.floor_button_pressed(0, 1) && j != N) {
+			if(midway_node.mystate.floorButtonPressed(0, 1) && j != N) {
 				floor_buttons.push_back(2*j);
 				if(j == 0)
 					flag = true;
@@ -229,14 +246,14 @@ node perform_input_action(vector<string> actions, node current_node) {
 			}
 		}
 	}
-	else if(action[0][0] == 'B') {
-		if(action[0][1] == 'U') {
-			int floor = action[0][3] - '0';
+	else if(actions[0][0] == 'B') {
+		if(actions[0][1] == 'U') {
+			int floor = actions[0][3] - '0';
 			midway_node.mystate.turnOnFloorButton(floor, 1);
 			midway_node.mystate.setProbFloUp(floor, 1.0);
 		}
-		else if(action[0][1] == 'D') {
-			int floor = action[0][3] - '0';
+		else if(actions[0][1] == 'D') {
+			int floor = actions[0][3] - '0';
 			midway_node.mystate.turnOnFloorButton(floor, 0);
 			midway_node.mystate.setProbFloDown(floor, 1.0);
 		}	
@@ -362,7 +379,7 @@ void get_action1(vector<int> &actions, node midway_node) {
 				actions.push_back(5);
 			}
 			else {
-				actions.push_back(3);
+				// actions.push_back(3);
 				bool any_floor_button_pressed_below = false;
 				bool any_floor_button_pressed_above = false;
 				for(int i = 1; i <= N; i++) {
@@ -378,11 +395,15 @@ void get_action1(vector<int> &actions, node midway_node) {
 						else
 							any_floor_button_pressed_below = true;
 					}
-					if(any_floor_button_pressed_above)
-						actions.push_back(1);
-					if(any_floor_button_pressed_below)
-						actions.push_back(2);
 				}
+				if(any_floor_button_pressed_above)
+					actions.push_back(1);
+				else if(floor1 != 5)
+					actions.push_back(5);
+				if(any_floor_button_pressed_below)
+					actions.push_back(2);
+				else if(floor1 != 1)
+					actions.push_back(4);
 			}
 		}
 	}
@@ -496,7 +517,7 @@ void get_action2(vector<int> &actions, node midway_node) {
 				actions.push_back(5);
 			}
 			else {
-				actions.push_back(3);
+				// actions.push_back(3);
 				bool any_floor_button_pressed_below = false;
 				bool any_floor_button_pressed_above = false;
 				for(int i = 1; i <= N; i++) {
@@ -512,216 +533,146 @@ void get_action2(vector<int> &actions, node midway_node) {
 						else
 							any_floor_button_pressed_below = true;
 					}
-					if(any_floor_button_pressed_above)
-						actions.push_back(1);
-					if(any_floor_button_pressed_below)
-						actions.push_back(2);
 				}
+				if(any_floor_button_pressed_above)
+					actions.push_back(1);
+				else if(floor1 != 5)
+					actions.push_back(5);
+				if(any_floor_button_pressed_below)
+					actions.push_back(2);
+				else if(floor1 != 1)
+					actions.push_back(4);
 			}
 		}
 	}
 }
 
-void generate_actions(vector<uint8_t> &actions, node midway_node) {
+void generate_actions(vector<int> &actions, node midway_node) {
 	vector<int> action1;
 	vector<int> action2;
 	get_action1(action1, midway_node);
 	get_action2(action2, midway_node);
+	cerr<<"THE SIZE OF ACTION 1 = "<<action1.size();
+	cerr<<"THE SIZE OF ACTION 2 = "<<action2.size();
 
 	for(int i = 0; i < action1.size(); i++) {
 		for(int j = 0; j < action2.size(); j++) {
-			uint8_t encoded = getencoding(action1[i], action2[i]);
+			int encoded = action1[i]*10 + action2[j];
 			actions.push_back(encoded);
 		}
 	}
-}
+} 
 
 // PERFORM ACTION
-node perform_output_action(vector<uint8_t> actions, node midway_node) {
-	
+node perform_output_action(int action, node midway_node) {
 	node final_node(midway_node);
+	int action1 = action/10;
+	int action2 = action%10;
+	float expected_no_of_people = 0;
+	for(int i = 1; i <= N; i++) {
+		if(i != 5)
+			expected_no_of_people += midway_node.mystate.getProbFloUp(i);
+		if(i != 1)
+			expected_no_of_people += midway_node.mystate.getProbFloDown(i);
+		expected_no_of_people += midway_node.mystate.getProbElev(i, 1);
+		expected_no_of_people += midway_node.mystate.getProbElev(i, 2);
+	}
+	total_cost += WAIT_TIME_COST_FACTOR*expected_no_of_people;
+	switch(action1) {
+		case 1: {
+ 			total_cost += UP_DOWN_COST_FACTOR;
+ 			final_node.mystate.setFloor(1, midway_node.mystate.getFloor(1) + 1);
+ 			final_node.mystate.closeDoor(1);
+ 			break;
+		}
+		case 2: {
+ 			total_cost += UP_DOWN_COST_FACTOR;
+ 			final_node.mystate.setFloor(1, midway_node.mystate.getFloor(1) - 1);
+ 			final_node.mystate.closeDoor(1);
+ 			break;
+		}
+		case 3: {
+				final_node.mystate.closeDoor(1);
+				break;
+			}
+		case 4: {
+			final_node.mystate.turnOffElevatorButton(midway_node.mystate.getFloor(1), 1);
+			final_node.mystate.openDoor(1);
+			final_node.mystate.setDirection(1, 1);
+			break;
+		}
+		case 5: {
+			final_node.mystate.turnOffElevatorButton(midway_node.mystate.getFloor(1), 1);
+			final_node.mystate.openDoor(1);
+			final_node.mystate.setDirection(1, 0);
+			break;
+		}
+	}
 
-	// // Lets get some variables from the current state
-	// int new_floor1 = get_floor(1, current_state.mystate);
-	// int new_floor2 = get_floor(2, current_state.mystate);
-	// int direction1 = get_direction(1, current_state.mystate);
-	// int direction2 = get_direction(2, current_state.mystate);
-	
-	// int floor_button1 = 2*(new_floor1-1);
-	// int floor_button2 = 2*(new_floor1-1)+1;
-	// if(floor_button2 == 9)
-	// 	floor_button2 = 0;
-	// int floor_button3 = 2*(new_floor2-1);
-	// int floor_button4 = 2*(new_floor2-1)+1;
-	// if(floor_button4 == 9)
-	// 	floor_button4 = 0;
-	// if(floor_button_pressed(floor_button1) && direction1 == -1) {
-	// 	string open_doors = "AOD1";
-	// 	new_actions.push_back(open_doors);
-	// 	string turn_off_button = "BO";
-	// 	turn_off_button += floor_button1;
-	// 	new_actions.push_back(turn_off_button);
-	// 	string turn_off_lift_button = "BF";
-	// 	turn_off_button += new_floor1;
-	// 	turn_off_button += '1';
-	// 	new_actions.push_back(turn_off_lift_button);
-	// 	for(int i = 0; i < no_of_people; i++) {
-	// 		if(get_location(i) == new_floor1) {
-	// 			string change_location = "PL";
-	// 			change_location += i;
-	// 			change_location += P + 1;
-	// 			new_actions.push_back(change_location);
-	// 		}
-	// 		if(get_destination(i) == new_floor1) {
-	// 			string remove_person = "PO";
-	// 			remove_person += i;
-	// 			new_actions.push_back(remove_person);
-	// 		}
-	// 	}
-	// }
-	// else if(floor_button_pressed(floor_button2) && direction1 == 1) {
-	// 	string open_doors = "AOU1";
-	// 	new_actions.push_back(open_doors);
-	// 	string turn_off_button = "BO";
-	// 	turn_off_button += floor_button1;
-	// 	new_actions.push_back(turn_off_button);
-	// 	string turn_off_lift_button = "BF";
-	// 	turn_off_button += new_floor1;
-	// 	turn_off_button += '1';
-	// 	new_actions.push_back(turn_off_lift_button);
-	// 	for(int i = 0; i < no_of_people; i++) {
-	// 		if(get_location(i) == new_floor1) {
-	// 			string change_location = "PL";
-	// 			change_location += i;
-	// 			change_location += P + 1;
-	// 			new_actions.push_back(change_location);
-	// 		}
-	// 		if(get_destination(i) == new_floor1) {
-	// 			string remove_person = "PO";
-	// 			remove_person += i;
-	// 			new_actions.push_back(remove_person);
-	// 		}
-	// 	}
-	// }
-	// else if(doors_opened(1)) {
-	// 	string doors_closed = "AC"
-	// 	if(direction1 == 1)
-	// 		doors_closed += 'U';
-	// 	else if(direction1 == -1)
-	// 		doors_closed += 'D';
-	// 	doors_closed += new_floor1;
-	// 	new_actions.push_back(doors_closed);
-	// 	if(direction1 == 1)
-	// 		new_floor1++;
-	// 	else if(direction1 == -1)
-	// 		new_floor1--;
-	// 	string update_floor = "A1";
-	// 	update_floor += new_floor1;
-	// 	new_actions.push_back(update_floor);
-	// }
-	// else if(direction1 == 1 && any_lift_buttons_pressed_above(new_floor1)) {
-	// 	new_floor1++;
-	// 	string update_floor = "A1";
-	// 	update_floor += new_floor1;
-	// 	new_actions.push_back(update_floor);
-	// 	string update_direction = "AU1";
-	// 	new_actions.push_back(update_direction);
-	// }
-	
-	// if(floor_button_pressed(floor_button3) && direction2 == -1) {
-	// 	string open_doors = "AOD2";
-	// 	new_actions.push_back(open_doors);
-	// 	string turn_off_button = "BO";
-	// 	turn_off_button += floor_button1;
-	// 	new_actions.push_back(turn_off_button);
-	// 	string turn_off_lift_button = "BF";
-	// 	turn_off_button += new_floor2;
-	// 	turn_off_button += '2';
-	// 	new_actions.push_back(turn_off_lift_button);
-	// 	for(int i = 0; i < no_of_people; i++) {
-	// 		if(get_location(i) == new_floor2) {
-	// 			string change_location = "PL";
-	// 			change_location += i;
-	// 			change_location += P + 2;
-	// 			new_actions.push_back(change_location);
-	// 		}
-	// 		if(get_destination(i) == new_floor2) {
-	// 			string remove_person = "PO";
-	// 			remove_person += i;
-	// 			new_actions.push_back(remove_person);
-	// 		}
-	// 	}
-	// }
-	// else if(floor_button_pressed(floor_button3) && direction2 == 1) {
-	// 	string open_doors = "AOU2";
-	// 	new_actions.push_back(open_doors);
-	// 	string turn_off_button = "BO";
-	// 	turn_off_button += floor_button1;
-	// 	new_actions.push_back(turn_off_button);
-	// 	string turn_off_lift_button = "BF";
-	// 	turn_off_button += new_floor2;
-	// 	turn_off_button += '2';
-	// 	new_actions.push_back(turn_off_lift_button);
-	// 	for(int i = 0; i < no_of_people; i++) {
-	// 		if(get_location(i) == new_floor2) {
-	// 			string change_location = "PL";
-	// 			change_location += i;
-	// 			change_location += P + 2;
-	// 			new_actions.push_back(change_location);
-	// 		}
-	// 		if(get_destination(i) == new_floor2) {
-	// 			string remove_person = "PO";
-	// 			remove_person += i;
-	// 			new_actions.push_back(remove_person);
-	// 		}
-	// 	}
-	// }
-	// else if(doors_opened(2)) {
-	// 	string doors_closed = "AC"
-	// 	if(direction2 == 1)
-	// 		doors_closed += 'U';
-	// 	else if(direction2 == -1)
-	// 		doors_closed += 'D';
-	// 	doors_closed += new_floor2;
-	// 	new_actions.push_back(doors_closed);
-	// 	if(direction2 == 1)
-	// 		new_floor2++;
-	// 	else if(direction2 == -1)
-	// 		new_floor2--;
-	// 	string update_floor = "A2";
-	// 	update_floor += new_floor2;
-	// 	new_actions.push_back(update_floor);
-	// }
+	switch(action2) {
+		case 1: {
+ 			total_cost += UP_DOWN_COST_FACTOR;
+ 			final_node.mystate.setFloor(2, midway_node.mystate.getFloor(2) + 1);
+ 			final_node.mystate.closeDoor(2);
+ 			break;
+		}
+		case 2: {
+ 			total_cost += UP_DOWN_COST_FACTOR;
+ 			final_node.mystate.setFloor(2, midway_node.mystate.getFloor(2) - 1);
+ 			final_node.mystate.closeDoor(2);
+ 			break;
+		}
+		case 3: {
+			final_node.mystate.closeDoor(2);
+			break;
+		}
+		case 4: {
+			final_node.mystate.turnOffElevatorButton(midway_node.mystate.getFloor(2), 2);
+			final_node.mystate.openDoor(2);
+			final_node.mystate.setDirection(2, 1);
+			break;
+		}
+		case 5: {
+			final_node.mystate.turnOffElevatorButton(midway_node.mystate.getFloor(2), 2);
+			final_node.mystate.openDoor(2);
+			final_node.mystate.setDirection(2, 0);
+			break;
+		}
+	}
+	return final_node;
 }
 
 
 void go1(int offset, int k) {
   if (k == 0) {
-    all_combinations1[comb_count1].push_back(combination1);
+    all_combinations1.push_back(combination1);
     comb_count1++;
     return;
   }
   for (int i = offset; i <= buttons1.size() - k; ++i) {
     combination1.push_back(buttons1[i]);
-    go(i+1, k-1);
+    go1(i+1, k-1);
     combination1.pop_back();
   }
 }
 
 void go2(int offset, int k) {
   if (k == 0) {
-    all_combinations2[comb_count2].push_back(combination2);
+    all_combinations2.push_back(combination2);
     comb_count2++;
     return;
   }
   for (int i = offset; i <= buttons2.size() - k; ++i) {
     combination2.push_back(buttons2[i]);
-    go(i+1, k-1);
+    go2(i+1, k-1);
     combination2.pop_back();
   }
 }
 
-void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
+vector<string> generate_input_actions(node curr_node) {
+	vector<vector<string>> actions;
+	srand(time(0));
+	cerr<<"IN generate_input_actions"<<endl;
 	int flag1 = 0, flag2 = 0, count = 0;
 	if(curr_node.mystate.isOpen(0)) {
 		flag1 = 1;
@@ -734,9 +685,13 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 		if(i == 0) {
 			string myaction = "0";
 			input_action.push_back(myaction);
+			actions.push_back(input_action);
+			cerr<<"PUSHING IN 0"<<endl;
 		}
 		else if (i != 0) {
-			if(curr_node.mystate.floorButtonPressed(i))
+			int the_floor = i/2 + 1;
+			int the_direction = i%2;
+			if(curr_node.mystate.floorButtonPressed(the_floor, the_direction))
 				continue;
 			else {
 				string myaction;
@@ -749,7 +704,9 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 					myaction += i/2 + 1;
 				}
 				input_action.push_back(myaction);
+				actions.push_back(input_action);
 			}
+			cerr<<"PUSHING IN "<<i<<endl;
 		}
 		int direction = curr_node.mystate.getDirection(0)%3;
 		float prob;
@@ -827,17 +784,130 @@ void generate_input_actions(node curr_node, vector<vector<string>> &actions) {
 				actions.push_back(next_action);
 			}
 		}
-		else
-			actions.push_back(input_action);
 	}
+	cerr<<"Choosing random bid"<<endl;
+	cerr<<"actions size = "<<actions.size();
+	int random = rand()%actions.size();
+	return actions[random];
+}
+
+int best_policy(node midway_node) {
+	return 33;
+}
+
+vector<string> translate_actions(int n) {
+	vector<string> actions;
+	int action1 = n/10;
+	int action2 = n%10;
+	switch(action1) {
+		case 1 : {
+			actions.push_back("AU1");
+			break;
+		}
+		case 2 : {
+			actions.push_back("AD1");
+			break;
+		}
+		case 3 : {
+			actions.push_back("AS1");
+			break;
+		}
+		case 4 : {
+			actions.push_back("AOU1");
+			break;
+		}
+		case 5 : {
+			actions.push_back("AOD1");
+			break;
+		}
+	}
+	switch(action2) {
+		case 1 : {
+			actions.push_back("AU2");
+			break;
+		}
+		case 2 : {
+			actions.push_back("AD2");
+			break;
+		}
+		case 3 : {
+			actions.push_back("AS2");
+			break;
+		}
+		case 4 : {
+			actions.push_back("AOU2");
+			break;
+		}
+		case 5 : {
+			actions.push_back("AOD2");
+			break;
+		}
+	}
+	return actions;
+}
+
+vector<string> get_best_action(vector<string> input_actions, node &current_node) {
+	cerr<<"in best action"<<endl;
+	node midway_node(perform_input_action(input_actions, current_node));
+	cerr<<"performed input action"<<endl;
+	vector<int> actions;
+	generate_actions(actions, midway_node);
+	int action_size = actions.size();
+	cerr<<"Actions generated"<<endl;
+	if(action_size == 0)
+		cerr<<"INVALID"<<endl;
+	else 
+		cerr<<"Size of actions is" << action_size;
+	for(int i = 0; i < action_size; i++) {
+		cerr<<"Action is = "<<actions[i]<<endl;
+	}
+	cerr<<"SO far so good"<<endl;
+	if(action_size == 1) {
+		current_node = perform_output_action(actions[0], midway_node);
+		return translate_actions(actions[0]);
+	}
+	else {
+		cerr<<"Defining weights"<<endl;
+		float current_cost = total_cost;
+		float *weights;
+		weights = new float[action_size];
+		for(int i = 0; i < action_size; i++) {
+			total_cost = current_cost;
+			node temp_node(perform_output_action(actions[i], midway_node));
+			cerr<<"temp_node created "<<i<<endl;
+			for(int j = 0; j < rollout; j++) {
+				cerr<<"Getting random obserrvation"<<endl;
+				vector<string> inputed_action = generate_input_actions(temp_node);
+				cerr<<"Performing input action"<<endl;
+				temp_node = perform_input_action(inputed_action, temp_node);
+				cerr<<"Obtain best policy"<<endl;
+				int best_action = best_policy(temp_node);
+				cerr<<"Performing best policy"<<endl;
+				temp_node = perform_output_action(best_action, temp_node);
+			}
+			weights[i] = total_cost;
+		}
+		int index, min = INT_MAX;
+		for(int i = 0; i < actions.size(); i++) {
+			if(weights[i] < min) {
+				min = weights[i];
+				index = i;
+			}
+		}
+		total_cost = current_cost;
+		current_node = perform_output_action(actions[index], midway_node);
+		return translate_actions(actions[index]);
+	}	
 }
 
 void split(string input, vector<string> &input_actions) {
 	// Split input string
+		cerr<<"Inside split"<<endl;
 		string delimiter = " ";
 		size_t pos = 0;
 		string token;
 		while ((pos = input.find(delimiter)) != string::npos) {
+			cerr<<"Running while"<<endl;
 		    token = input.substr(0, pos);
 		    input_actions.push_back(token);
 		    input.erase(0, pos + delimiter.length());
@@ -845,21 +915,30 @@ void split(string input, vector<string> &input_actions) {
 }
 
 int main(int argc, char* argv[]) {
-	cout<<"Lets get started Ankush!";
-	N = argv[1];
-	K = argv[2];
-	p = argv[3];
-	q = argv[4];
-	r = argv[5];
+	cerr<<"Lets get started Ankush!";
+	N = stoi(argv[1]);
+	K = stoi(argv[2]);
+	p = stof(argv[3]);
+	q = stof(argv[4]);
+	r = stof(argv[5]);
+	t = stoi(argv[6]);
 	string input;
+	node current_node;
+	cout<<"0\n";
 	do {
 		cin>>input;
+		input = input + " end";
+		cerr<<"INPUT = "<<input<<endl;
 		vector<string> input_actions;
+		vector<string> output_actions;
 		split(input, input_actions);
 		for(int i = 0; i < input_actions.size(); i++) {
-			if(input_actions[i] != "0")
-				perform_input_action(input_actions[i]);
+			cerr<<"ACTION = "<<input_actions[i]<<endl;
 		}
+		cerr<<input_actions.size()<<endl;
+		output_actions = get_best_action(input_actions, current_node);
+		cerr<<output_actions[0]<<" "<<output_actions[1]<<endl;
+		cout<<output_actions[0]<<" "<<output_actions[1]<<endl;
 	} while(input != "DONE");
 	
 	return 0;
