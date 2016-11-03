@@ -1,6 +1,7 @@
 #ifndef STATE_H
 #define STATE_H
 #include <stdlib.h>
+#include <iostream>
 
 // using namespace std;
 
@@ -18,10 +19,9 @@ public:
 	//30: e1 open = 1/closed = 0
 	//31: e2 open = 1/closed =0
 	//etc
-	uint64_t e1_dist;
-	uint64_t e2_dist;
+	int e_dist[5][2];
 	// prob distr. of ppl wanting to get off at each floor - 12 bits per floor
-	uint32_t *floor_dist;
+	int floor_dist[5][2];
 	// prob distr. of ppl wanting to go up or down on each floor - 12 bits per direction
 	int normalise;// normalising constant - 12 bit number
 
@@ -99,17 +99,17 @@ public:
 	//methods for retrieving distribution
 	inline float getProbElev(int n,int k){
 		//prob a person in elevator k gets off at floor n
-		return (k==1)?(((e1_dist>>(12*(n-1)))&(4095))/normalise):(((e2_dist>>(12*n-12))&(4095))/normalise);
+		return e_dist[n-1][k-1]/(float)normalise;
 	}
 
 	inline float getProbFloUp(int n){
 		//prob that a person on floor n wants to go up
-		return (floor_dist[n-1]&(4095))/normalise;
+		return floor_dist[n-1][1]/(float)normalise;
 	}
 
 	inline float getProbFloDown(int n){
 		//prob that a perosn on floor n wants to go down
-		return ((floor_dist[n-1]>>12)&(4095))/normalise;
+		return floor_dist[n-1][0]/(float)normalise;
 	}
 
 	// methods for changing distributions
