@@ -1,4 +1,4 @@
 #!/bin/bash
 
 ## Compile our two program files
-g++ -std=c++11 -Ofast -march=native -o mdp main.cpp state.cpp simulate.cpp person.cpp
+g++ -std=c++11 -g -Ofast -march=native -o mdp main.cpp state.cpp
