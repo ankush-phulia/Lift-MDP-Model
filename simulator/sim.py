@@ -1,6 +1,7 @@
 from Communicator import Communicator
 from Enivronment import Environment
-import os, argparse
+import os
+import argparse
 
 
 class Interactor(Communicator):
@@ -55,7 +56,8 @@ class Interactor(Communicator):
             None
         """
         if (self.CheckExeFile(Execution_Command, Executable_File)):
-            super(Interactor, self).CreateChildProcess(Execution_Command, Executable_File, args_list)
+            super(Interactor, self).CreateChildProcess(
+                Execution_Command, Executable_File, args_list)
         else:
             print 'ERROR : EITHER FILE ', Executable_File, ' DOES NOT EXIST',
             print 'OR THE EXECUTION COMMAND TO RUN THE FILE ', Execution_Command, ' IS INCORRECT'
@@ -112,7 +114,8 @@ class Interactor(Communicator):
 
 
 def simulate(args):
-    args_list = [str(args.N), str(args.K), str(args.p), str(args.q), str(args.r), str(args.t)]
+    args_list = [str(args.N), str(args.K), str(args.p),
+                 str(args.q), str(args.r), str(args.t)]
     interactor = Interactor()
 
     if args.exe.endswith('.py'):
@@ -139,9 +142,11 @@ def simulate(args):
             sim_log += 'ERROR\n'
             break
 
-        new_buttons_pressed = env.apply_action([''.join([i for i in x if not i.isdigit()]) for x in actions])
+        new_buttons_pressed = env.apply_action(
+            [''.join([i for i in x if not i.isdigit()]) for x in actions])
         if new_buttons_pressed == 'INVALID ACTION' or len(actions) != args.K:
-            print('~'*len(new_buttons_pressed) + '\n' + new_buttons_pressed + '\n' + '~'*len(new_buttons_pressed))
+            print('~'*len(new_buttons_pressed) + '\n' +
+                  new_buttons_pressed + '\n' + '~'*len(new_buttons_pressed))
             sim_log += 'INVALID ACTION\n'
             break
 
@@ -163,7 +168,8 @@ def simulate(args):
             print(env)
             print('=> Update sent : ' + new_buttons_pressed)
 
-    print('FINAL TOTAL COST (at the end of ' + str(episode+1) + ' simulations) : ' + str(env.total_cost))
+    print('FINAL TOTAL COST (at the end of ' + str(episode+1) +
+          ' simulations) : ' + str(env.total_cost))
 
     interactor.closeChildProcess()
     f = open(args.log, 'w')
@@ -171,18 +177,25 @@ def simulate(args):
     f.close()
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Elevator Control Simulator')
-    parser.add_argument('exe', metavar='run.sh', type=str, help='your executable')
+    parser.add_argument('exe', metavar='run.sh',
+                        type=str, help='your executable')
     parser.add_argument('N', metavar='5', type=int, help='number of floors')
     parser.add_argument('K', metavar='2', type=int, help='number of elevators')
-    parser.add_argument('p', metavar='0.8', type=float, help='prob person arrives')
-    parser.add_argument('q', metavar='0.7', type=float, help='prob person arrives at ground floor, if s/he arrives')
-    parser.add_argument('r', metavar='0.9', type=float, help='prob person gets down at first floor')
+    parser.add_argument('p', metavar='0.8', type=float,
+                        help='prob person arrives')
+    parser.add_argument('q', metavar='0.7', type=float,
+                        help='prob person arrives at ground floor, if s/he arrives')
+    parser.add_argument('r', metavar='0.9', type=float,
+                        help='prob person gets down at first floor')
     parser.add_argument('t', metavar='1', type=float, help='time unit')
-    parser.add_argument('-ep', dest='ep', type=int, default=1000, help='number of episodes to play, default 1000')
-    parser.add_argument('-mode', dest='mode', type=str, default='CUI', help='display settings')
-    parser.add_argument('-log', dest='log', type=str, default='simulation.txt', help='name for simulation log file, default simulation.txt')
+    parser.add_argument('-ep', dest='ep', type=int, default=1000,
+                        help='number of episodes to play, default 1000')
+    parser.add_argument('-mode', dest='mode', type=str,
+                        default='CUI', help='display settings')
+    parser.add_argument('-log', dest='log', type=str, default='simulation.txt',
+                        help='name for simulation log file, default simulation.txt')
     args = parser.parse_args()
 
     simulate(args)

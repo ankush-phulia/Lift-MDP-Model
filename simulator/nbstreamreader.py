@@ -1,6 +1,7 @@
 from threading import Thread
 from Queue import Queue, Empty
 
+
 class NonBlockingStreamReader:
 
     def __init__(self, stream):
@@ -24,15 +25,15 @@ class NonBlockingStreamReader:
                     # raise UnexpectedEndOfStream
                     pass
 
-        self._t = Thread(target = _populateQueue,
-                args = (self._s, self._q))
+        self._t = Thread(target=_populateQueue,
+                         args=(self._s, self._q))
         self._t.daemon = True
-        self._t.start() #start collecting lines from the stream
+        self._t.start()  # start collecting lines from the stream
 
-    def readline(self, timeout = None):
+    def readline(self, timeout=None):
         try:
-            return self._q.get(block = timeout is not None,
-                    timeout = timeout)
+            return self._q.get(block=timeout is not None,
+                               timeout=timeout)
         except Empty:
             return None
 

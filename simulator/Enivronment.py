@@ -18,7 +18,8 @@ class Person(object):
             if random.random() < r:
                 self.dest = 0
             else:
-                self.dest = random.choice(range(1, self.start) + range(self.start + 1, N))
+                self.dest = random.choice(
+                    range(1, self.start) + range(self.start + 1, N))
 
         if self.start < self.dest:
             self.direction = 'U'
@@ -62,8 +63,12 @@ class Environment(object):
         self.elev.reset_lights()
 
         # update costs
-        self.total_cost += Environment.WAIT_TIME_COST_FACTOR * len(self.people_in_sys)        # cost for people carried over from last time step
-        self.total_cost += Environment.UP_DOWN_COST_FACTOR * len([x for x in action if x=='AU' or x=='AD'])   # cost for all lifts moved
+        # cost for people carried over from last time step
+        self.total_cost += Environment.WAIT_TIME_COST_FACTOR * \
+            len(self.people_in_sys)
+        self.total_cost += Environment.UP_DOWN_COST_FACTOR * \
+            len([x for x in action if x == 'AU' or x == 'AD']
+                )   # cost for all lifts moved
 
         new_buttons_pressed = ''
 
@@ -78,20 +83,26 @@ class Environment(object):
 
         # embarkation, disembarkation
         for k in range(self.K):
-            if action[k] == 'AOU' or action[k] == 'AOD':    # remove people with this dest, unpress floor and lift buttons
-                self.people_in_sys = [x for x in self.people_in_sys if not (x.elev_num == k and x.dest == self.elev.pos[k])]
+            # remove people with this dest, unpress floor and lift buttons
+            if action[k] == 'AOU' or action[k] == 'AOD':
+                self.people_in_sys = [x for x in self.people_in_sys if not (
+                    x.elev_num == k and x.dest == self.elev.pos[k])]
                 self.elev.modify_elevator_button(k, self.elev.pos[k], 0)
-                self.elev.modify_floor_button(self.elev.pos[k], action[k][-1], 0)
+                self.elev.modify_floor_button(
+                    self.elev.pos[k], action[k][-1], 0)
 
                 # add people to the elevator who want to go in the direction of lift, press their buttons
                 for i in range(len(self.people_in_sys)):
                     if (self.people_in_sys[i].elev_num == -1 and self.people_in_sys[i].start == self.elev.pos[k] and
                             self.people_in_sys[i].direction == action[k][-1]):
                         self.people_in_sys[i].elev_num = k
-                        unpressed = self.elev.modify_elevator_button(k, self.people_in_sys[i].dest, 1)
+                        unpressed = self.elev.modify_elevator_button(
+                            k, self.people_in_sys[i].dest, 1)
 
                         if unpressed:   # may have been pressed by someone already in list, or multiple times by people entering => add once
-                            new_buttons_pressed += 'B_' + str(self.people_in_sys[i].dest + 1) + '_' + str(k+1) + ' '
+                            new_buttons_pressed += 'B_' + \
+                                str(self.people_in_sys[i].dest +
+                                    1) + '_' + str(k+1) + ' '
 
             # set lights
             if action[k] == 'AOU':
@@ -104,10 +115,13 @@ class Environment(object):
         # person arrival
         if random.random() < self.p:     # person arrives
             self.total_people_served += 1
-            new_person = Person(self.total_people_served, self.N, self.q, self.r)
-            unpressed = self.elev.modify_floor_button(new_person.start, new_person.direction, 1)
+            new_person = Person(self.total_people_served,
+                                self.N, self.q, self.r)
+            unpressed = self.elev.modify_floor_button(
+                new_person.start, new_person.direction, 1)
             if unpressed:
-                new_buttons_pressed = 'B' + new_person.direction + '_' + str(new_person.start+1) + ' ' + new_buttons_pressed
+                new_buttons_pressed = 'B' + new_person.direction + '_' + \
+                    str(new_person.start+1) + ' ' + new_buttons_pressed
                 floor_button_pressed = True
 
             self.people_in_sys.append(new_person)
@@ -134,7 +148,8 @@ class Environment(object):
         state += 'FLOOR' + ' '*(left_margin-5) + ' '*(lift_width/2 + 1)
         for i in range(self.N):
             # complex rule for accounting for different string lengths for more than 100 floors
-            state += str(i+1) + ' '*(lift_width - len(str(i+1)) - (len(str(i+2))-len(str(i+1)))*((len(str(i+2))-1)/2) + 1 )
+            state += str(i+1) + ' '*(lift_width - len(str(i+1)) -
+                                     (len(str(i+2))-len(str(i+1)))*((len(str(i+2))-1)/2) + 1)
         state += '\n'
 
         # people waiting
@@ -150,9 +165,11 @@ class Environment(object):
             else:
                 people_in_lift[person.elev_num] += 1
 
-        state += 'PEOPLE WAITING UP/DOWN' + ' '*(left_margin-22) + ' '*(lift_width/2)
-        for u,d in zip(waiting_up,waiting_down):
-            state += str(u) + '/' +str(d) + ' '*(lift_width-len(str(u)+str(d)))
+        state += 'PEOPLE WAITING UP/DOWN' + ' ' * \
+            (left_margin-22) + ' '*(lift_width/2)
+        for u, d in zip(waiting_up, waiting_down):
+            state += str(u) + '/' + str(d) + ' ' * \
+                (lift_width-len(str(u)+str(d)))
         state += '\n'
 
         # up and down buttons
@@ -165,7 +182,8 @@ class Environment(object):
             state += ' '*(lift_width-2)
         state += '\n'
 
-        state += 'FLOOR DOWN BUTTON' + ' ' * (left_margin + lift_width / 2 - 17)
+        state += 'FLOOR DOWN BUTTON' + ' ' * \
+            (left_margin + lift_width / 2 - 17)
         for i in range(self.N):
             if self.elev.BD[i]:
                 state += '<--'
@@ -179,9 +197,11 @@ class Environment(object):
             state += ' '*(left_margin + 1)
             for j in range(self.N):
                 if self.elev.pos[i] == j and self.elev.LU[i]:
-                    state += ' ' * (lift_width / 2 - 1) + '-->' + ' ' * (lift_width / 2)
+                    state += ' ' * (lift_width / 2 - 1) + \
+                        '-->' + ' ' * (lift_width / 2)
                 elif self.elev.pos[i] == j and self.elev.LD[i]:
-                    state += ' ' * (lift_width / 2 - 1) + '<--' + ' ' * (lift_width / 2)
+                    state += ' ' * (lift_width / 2 - 1) + \
+                        '<--' + ' ' * (lift_width / 2)
                 else:
                     state += ' ' * (lift_width + 1)
             state += '\n'
@@ -192,17 +212,22 @@ class Environment(object):
                 else:
                     state += '-'*(lift_width+1)
             state += '\n'
-            state += 'ELEVATOR ' + str(i+1) + ' '*(left_margin - 9 - len(str(i+1)))
+            state += 'ELEVATOR ' + str(i+1) + ' ' * \
+                (left_margin - 9 - len(str(i+1)))
 
             for j in range(self.N):
                 if self.elev.pos[i] == j:
-                    state += '|' + ' '*(lift_width/2) + '.' + ' '*(lift_width/2)
+                    state += '|' + ' '*(lift_width/2) + \
+                        '.' + ' '*(lift_width/2)
                 else:
                     state += '|' + ' '*lift_width
-            state += '|' + ' '*5 + 'PEOPLE IN LIFT : ' + str(people_in_lift[i]) + '\n'
+            state += '|' + ' '*5 + 'PEOPLE IN LIFT : ' + \
+                str(people_in_lift[i]) + '\n'
 
-            state += ' ' * left_margin + '-' * ((lift_width + 1) * self.N + 1) + '\n'
-            state += 'BUTTONS PRESSED' + ' '*(left_margin-15 + lift_width/2 + 1)
+            state += ' ' * left_margin + '-' * \
+                ((lift_width + 1) * self.N + 1) + '\n'
+            state += 'BUTTONS PRESSED' + ' ' * \
+                (left_margin-15 + lift_width/2 + 1)
             for j in range(self.N):
                 if self.elev.BF[i][j]:
                     state += 'o' + ' '*lift_width
@@ -211,7 +236,8 @@ class Environment(object):
             state += '\n'
 
         state += '\n'
-        state += 'TOTAL PEOPLE IN SYSTEM : ' + str(len(self.people_in_sys)) + '\n'
+        state += 'TOTAL PEOPLE IN SYSTEM : ' + \
+            str(len(self.people_in_sys)) + '\n'
         state += 'TOTAL CUMULATIVE COST  : ' + str(self.total_cost) + '\n'
         state += '-' * (left_margin + (lift_width + 1) * self.N + 24)
 

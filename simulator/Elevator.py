@@ -2,24 +2,32 @@ class Elevator(object):
     """
     - state representation of the elevator
     """
+
     def __init__(self, N, K):
         self.N = N                              # number of floors
         self.K = K                              # number of elevators
 
-        self.pos = [0]*K                        # initial positions of all elevators
-        self.BU = [0]*N                         # button up on each floor   (always 0 for top floor)
-        self.BD = [0]*N                         # button down on each floor (always 0 for first floor)
-        self.BF = [[0]*N for i in range(K)]     # floor buttons pressed inside elevator, for each elevator
-        self.LU = [0]*K                         # light up indicator for each lift for its current floor (always 0 for top floor)
-        self.LD = [0]*K                         # light down indicator for each lift for its current floor (always 0 for first floor)
+        # initial positions of all elevators
+        self.pos = [0]*K
+        # button up on each floor   (always 0 for top floor)
+        self.BU = [0]*N
+        # button down on each floor (always 0 for first floor)
+        self.BD = [0]*N
+        # floor buttons pressed inside elevator, for each elevator
+        self.BF = [[0]*N for i in range(K)]
+        # light up indicator for each lift for its current floor (always 0 for top floor)
+        self.LU = [0]*K
+        # light down indicator for each lift for its current floor (always 0 for first floor)
+        self.LD = [0]*K
 
     def __str__(self):
         """
         - returns a string expression of the current state of the elevator
         """
         state = ''
-        state += ' '.join([str(x) for x in self.pos])  + ' '
-        state += ''.join([str(x) + ' ' + str(y) + ' ' for x, y in zip(self.BU,self.BD)])
+        state += ' '.join([str(x) for x in self.pos]) + ' '
+        state += ''.join([str(x) + ' ' + str(y) + ' ' for x,
+                          y in zip(self.BU, self.BD)])
         for e in self.BF:
             state += ' '.join([str(x) for x in e])
             state += ' '
