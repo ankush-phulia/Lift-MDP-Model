@@ -82,8 +82,7 @@ void print_prob(state mystate) {
 
 // APPLY BUTTON PUSHES
 node perform_input_action(vector<string> actions, node current_node) {
-	// cerr<<"Inside perform input action"<<endl;
-	// print_prob(current_node.mystate);
+
 	node midway_node(current_node);
 	vector<int> floor_buttons;
 	vector<string> elevator1_button_actions;
@@ -92,20 +91,7 @@ node perform_input_action(vector<string> actions, node current_node) {
 	int buttons_pressed2 = 0;
 	int floor1_elev1_flag = 0;
 	int floor1_elev2_flag = 0;
-	// cerr<<"Elevator 1 buttons pressed : ";
-	for(int i = 1; i <= N; i++) {
-		if(midway_node.mystate.elevatorButtonPressed(1,i)) {
-			// cerr<<i<<" ";
-		}
-	}
-	// cerr<<endl;
-	// cerr<<"Elevator 2 buttons pressed : ";
-	for(int i = 1; i <= N; i++) {
-		if(midway_node.mystate.elevatorButtonPressed(2,i)) {
-			// cerr<<i<<" ";
-		}
-	}
-	// cerr<<endl;
+
 	for(int i = 1; i < actions.size(); i++) {
 		if(actions[i][4] == '1') {
 			if(actions[i][2] == '1')
@@ -178,7 +164,6 @@ node perform_input_action(vector<string> actions, node current_node) {
 					else
 						elev_floor_prob += (1.0 + floor_prob/(total_buttons_pressed));
 					midway_node.mystate.setProbElev(1, floor_no, round(elev_floor_prob*100));
-					// cerr<<"TURN ON ELEVATOR BUTTON "<<floor_no<<endl;
 				}
 				for(int i = 0; i < elevator_buttons.size(); i++) {
 					float elev_floor_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 1);
@@ -197,15 +182,14 @@ node perform_input_action(vector<string> actions, node current_node) {
 					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 1);
 					elev_floor_prob += (1.0);
 					midway_node.mystate.setProbElev(1, floor_no, round(elev_floor_prob*100));
-					// cerr<<"TURN ON ELEVATOR BUTTON "<<floor_no<<endl;
 				}
 			}
 		}
 		midway_node.mystate.setProbElev(1, floor, 0);
 	}
-	// cerr<<"checking if door 2 is open"<<endl;
+
 	if(midway_node.mystate.isOpen(2)) {
-		// cerr<<"Inside open 2"<<endl;
+
 		int floor = midway_node.mystate.getFloor(2);
 		int direction = midway_node.mystate.getDirection(2)%3;
 		midway_node.mystate.turnOffFloorButton(floor, direction);
@@ -230,7 +214,6 @@ node perform_input_action(vector<string> actions, node current_node) {
 				}
 			}
 		}
-		// cerr<<"Get to size"<<endl;
 		int size = elevator_buttons.size();
 		if(buttons_pressed2 == 0) {
 			for(int i = 0; i < size; i++) {
@@ -240,11 +223,11 @@ node perform_input_action(vector<string> actions, node current_node) {
 			}
 		}
 		else {
-			// cerr<<"Some buttons are pressed"<<endl;
+
 			if(floor_prob > buttons_pressed2) {
 				int total_buttons_pressed = buttons_pressed2 + elevator_buttons.size();
 				floor_prob = floor_prob - buttons_pressed2;
-				// cerr<<"Get passed the first for loop"<<endl;
+
 				for(int i = 0; i < buttons_pressed2; i++) {
 					int floor_no = elevator2_button_actions[i][2] - '0';
 					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 2);
@@ -256,7 +239,7 @@ node perform_input_action(vector<string> actions, node current_node) {
 						elev_floor_prob += (1.0 + floor_prob/(total_buttons_pressed));
 					midway_node.mystate.setProbElev(2, floor_no, round(elev_floor_prob*100));
 				}
-				// cerr<<"Get passed the first for loop"<<endl;
+
 				for(int i = 0; i < elevator_buttons.size(); i++) {
 					float elev_floor_prob = midway_node.mystate.getProbElev(elevator_buttons[i], 2);
 					if(elevator_buttons[i] == 1)
@@ -269,7 +252,6 @@ node perform_input_action(vector<string> actions, node current_node) {
 				}
 			}
 			else {
-				// cerr<<"Get passed the else"<<endl;
 				for(int i = 0; i < buttons_pressed2; i++) {
 					int floor_no = elevator2_button_actions[i][2] - '0';
 					float elev_floor_prob = midway_node.mystate.getProbElev(floor_no, 2);
@@ -280,9 +262,7 @@ node perform_input_action(vector<string> actions, node current_node) {
 		}
 		midway_node.mystate.setProbElev(2, floor, 0);
 	}
-	// cerr<<"first actions"<<endl;
 	if(actions[0][0] == '0') {
-		// cerr<<"zero action"<<endl;
 		bool flag = false;
 		for(int j = 1; j <= N; j++) {
 			if(midway_node.mystate.floorButtonPressed(j, 0) && j != 1)
@@ -293,25 +273,21 @@ node perform_input_action(vector<string> actions, node current_node) {
 					flag = true;
 			}
 		}
-		// cerr<<"Out of loop"<<endl;
 		int size = floor_buttons.size();
-		for(int j = 0; j < size; j++) {
+		for (int j = 0; j < size; j++) {
 			int floor = floor_buttons[j]/2 + 1;
-			if(floor_buttons[j]%2 == 1) {
+			if (floor_buttons[j]%2 == 1) {
 				float prob = midway_node.mystate.getProbFloUp(floor), new_prob;
 				if(flag) {
-					if(floor == 1) {
+					if (floor == 1) {
 						new_prob = prob + p*q;
-						// cerr<<"New prob = " << new_prob<<endl;
 					}
 					else {
 						new_prob = prob + p*(1-q)/(size-1);
-						// cerr<<"New prob = " << new_prob<<endl;
 					}
 				}
 				else {
 					new_prob = prob + p/size;
-					// cerr<<"New prob = " << new_prob<<endl;
 				}
 				midway_node.mystate.setProbFloUp(floor, round(new_prob*100));
 			}
@@ -324,10 +300,8 @@ node perform_input_action(vector<string> actions, node current_node) {
 				midway_node.mystate.setProbFloDown(floor, round(new_prob*100));
 			}
 		}
-		// cerr<<"Out of other loop"<<endl;
 	}
 	else if(actions[0][0] == 'B') {
-		// cerr<<"B wala action"<<endl;
 		if(actions[0][1] == 'U') {
 			int floor = actions[0][3] - '0';
 			midway_node.mystate.turnOnFloorButton(floor, 1);
@@ -339,7 +313,6 @@ node perform_input_action(vector<string> actions, node current_node) {
 			midway_node.mystate.setProbFloDown(floor, 100);
 		}	
 	}
-	// cerr<<"Returning node"<<endl;
 	return midway_node;
 }
 
@@ -357,8 +330,7 @@ void get_action1(vector<int> &actions, node midway_node) {
 // Lets get some variables from the current state
 	int floor1 = midway_node.mystate.getFloor(1);
 	int direction1 = midway_node.mystate.getDirection(1)%3;
-	// cerr<<"The floor of elevator 1 = "<<floor1<<endl;
-	// cerr<<"The direction of elevator 1 = "<<direction1<<endl;
+
 	if(midway_node.mystate.elevatorButtonPressed(1, floor1)) {
 		// cerr<<"We are on the output floor"<<endl;
 		if(direction1) {
@@ -417,7 +389,6 @@ void get_action1(vector<int> &actions, node midway_node) {
 		}
 	}
 	else {
-		// cerr<<"NOT on the output floor"<<endl;
 		bool pressed_up = false;
 		bool pressed_down = false;
 		for(int i = floor1 + 1; i <= N; i++) {
@@ -433,7 +404,6 @@ void get_action1(vector<int> &actions, node midway_node) {
 			}
 		}
 		if(pressed_up && floor1 != N) {
-			// cerr<<"Pressed up is true"<<endl;
 			if(midway_node.mystate.floorButtonPressed(floor1, 1)) {
 				actions.push_back(4);
 				if(q > 0.8 || q < 0.2)
@@ -444,7 +414,6 @@ void get_action1(vector<int> &actions, node midway_node) {
 			}
 		}
 		if(pressed_down && floor1 != 1) {
-			// cerr<<"Pressed down is true"<<endl;
 			if(midway_node.mystate.floorButtonPressed(floor1, 0)) {
 				actions.push_back(5);
 				if(q > 0.8 || q < 0.2)
@@ -457,21 +426,17 @@ void get_action1(vector<int> &actions, node midway_node) {
 		else {
 			// cerr<<"no button is pressed"<<endl;
 			if((midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != N) && (!midway_node.mystate.floorButtonPressed(floor1, 0) || floor1 == 1)) {
-					// cerr<<"heheh111"<<endl;
 					actions.push_back(4);
 			}
 			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (!midway_node.mystate.floorButtonPressed(floor1, 1) || floor1 == N)) {
-					// cerr<<"heheh222"<<endl;
 					actions.push_back(5);
 			}
 			else if((midway_node.mystate.floorButtonPressed(floor1, 0) && floor1 != 1) && (midway_node.mystate.floorButtonPressed(floor1, 1) && floor1 != N)) {
-				// cerr<<"heheh333"<<endl;
 				actions.push_back(4);
 				actions.push_back(5);
 			}
 			else {
 				// actions.push_back(3);
-				// cerr<<"heheh444"<<endl;
 				bool any_floor_button_pressed_below = false;
 				bool any_floor_button_pressed_above = false;
 				for(int i = 1; i <= N; i++) {
@@ -662,8 +627,6 @@ void generate_actions(vector<int> &actions, node midway_node) {
 	vector<int> action2;
 	get_action1(action1, midway_node);
 	get_action2(action2, midway_node);
-	// cerr<<"THE SIZE OF ACTION 1 = "<<action1.size();
-	// cerr<<"THE SIZE OF ACTION 2 = "<<action2.size();
 
 	for(int i = 0; i < action1.size(); i++) {
 		for(int j = 0; j < action2.size(); j++) {
@@ -933,22 +896,6 @@ vector<string> generate_input_actions(node curr_node) {
 int best_policy(node midway_node) {
 	vector<int> actions;
 	generate_actions(actions, midway_node);
-	// float current_cost = total_cost;
-	// int min = INT_MAX;
-	// int index;
-	// for(int i = 0; i < actions.size(); i++) {
-	// 	total_cost = current_cost;
-	// 	// cerr<<"creating temp_node"<<endl;
-	// 	node temp_node(perform_output_action(actions[i], midway_node));
-	// 	vector<string> inputed_action;
-	// 	inputed_action.push_back("0");
-	// 	temp_node = perform_input_action(inputed_action, temp_node);
-	// 	if(total_cost < min){
-	// 		index = i;
-	// 		min = total_cost;
-	// 	}
-	// }
-	// total_cost = current_cost;
 	int random = rand()%actions.size();
 	return actions[random];
 }
@@ -1126,10 +1073,7 @@ int basePolicy2(int n, int j){
 }
 
 int get_best_action2(vector<string> input_actions, node &current_node) {
-	// cerr<<"in best action"<<endl;
 	node midway_node(perform_input_action(input_actions, current_node));
-	// cerr<<"performed input action"<<endl;
-	// int action = basePolicy(midway_node.mystate, 5, rng);
 	int action = basePolicy2(N, er);
 	current_node = perform_output_action(action, midway_node);
 	return action;
@@ -1137,7 +1081,6 @@ int get_best_action2(vector<string> input_actions, node &current_node) {
 
 int main(int argc, char* argv[]) {
 	srand(time(NULL));
-	// cerr<<"Lets get started Ankush!";
 	N = stoi(argv[1]);
 	K = stoi(argv[2]);
 	p = stof(argv[3]);
@@ -1148,25 +1091,21 @@ int main(int argc, char* argv[]) {
 	int count = 0;
 	node current_node;
 	cout<<"0\n";
-	// cerr<<"Zero being sent"<<endl;
 	er = 0;
 	do {
 		count++;
 		er++;
 		getline(cin, input);
 		input = input + " end";
-		// cerr<<"INPUT = "<<input<<"count = "<<count<<endl;
 		vector<string> input_actions;
 		vector<string> output_actions;
 		split(input, input_actions);
 		for(int i = 0; i < input_actions.size(); i++) {
-			// cerr<<"ACTION = "<<input_actions[i]<<endl;
 		}
 		if(q < 0.15 && r > 0.85)
 			output_actions = translate_actions(get_best_action2(input_actions, current_node));
 		else
 			output_actions = get_best_action(input_actions, current_node);
-		// cerr<<output_actions[0]<<" "<<output_actions[1]<<endl;
 		cout<<output_actions[0]<<" "<<output_actions[1]<<endl;
 	} while(input != "DONE");
 	
